@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from Utils.server import *
+
 fichero = "/home/eirisdg/PycharmProjects/info-switches/lista_prueba"
 lista_ips = []
 
@@ -45,7 +47,7 @@ def carga_en_array():
 
 # Obtiene la IP de F0 de una ip base
 def get_f0(ipbase):
-    ultimo = ip(ipbase.split('.')[-1]) + 2
+    ultimo = int(ipbase.split('.')[-1]) + 2
     f0 = ipbase.split('.')[0] + '.' + ipbase.split('.')[1] + '.' + ipbase.split('.')[2] + '.' + str(ultimo)
     return f0
 
@@ -55,6 +57,9 @@ def escanea():
     global lista_ips
     carga_en_array()
     for i in lista_ips:
+        s = Server(get_f0(i))
+        ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
+        #s.command(ssh, 'ls -lah')
 
 
 # Aplicación principal
