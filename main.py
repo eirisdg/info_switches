@@ -57,35 +57,35 @@ def escanea():
     for i in lista_ips:
 
 
-
 # Aplicación principal
-while True:
-    # Mostramos menú
-    print menu()
+if __name__ == "__main__":
+    while True:
+        # Mostramos menú
+        print menu()
 
-    # Solicitamos la opción
-    opcion = input("Introduce una opción: ")
+        # Solicitamos la opción
+        opcion = input("Introduce una opción: ")
 
-    # Case para las opciones del menú
-    if opcion == 1:
-        configurar()
+        # Case para las opciones del menú
+        if opcion == 1:
+            configurar()
 
-    elif opcion == 2:
-        if fichero == "":
-            print "No se ha establecido fichero de IPs"
+        elif opcion == 2:
+            if fichero == "":
+                print "No se ha establecido fichero de IPs"
+                break
+            else:
+                escanea()
+
+        elif opcion == 3:
+            print opcion
+
+        elif opcion == 4:
+            print opcion
+
+        elif opcion == 0:
+            print "Hasta luego!"
             break
+
         else:
-            escanea()
-
-    elif opcion == 3:
-        print opcion
-
-    elif opcion == 4:
-        print opcion
-
-    elif opcion == 0:
-        print "Hasta luego!"
-        break
-
-    else:
-        print "No has pulsado una función correcta"
+            print "No has pulsado una función correcta"
