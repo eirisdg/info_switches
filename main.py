@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+fichero = "/home/eirisdg/PycharmProjects/info-switches/lista_prueba"
+lista_ips = []
+
+
 # Función para imprimir menú
 def menu():
     return ("====================\n"
@@ -8,15 +12,53 @@ def menu():
             "====================\n"
             "\n"
             " 1. Configurar\n"
-            " 2. \n"
+            " 2. Escanear switches\n"
             " 3. \n"
             " 4. \n"
             "\n"
             " 0. Salir\n"
             "====================")
+
+
 def configurar():
+    global fichero
+    fichero = raw_input("Introduce la ruta del fichero de IPs: ")
+    try:
+        archivo = open(fichero, 'r')
+        archivo.close()
+    except IOError:
+        print "No se puede abrir el archivo."
+        fichero = ""
 
 
+# Carga la lista de IPs del fichero en el array
+def carga_en_array():
+    global fichero, lista_ips
+    try:
+        archivo = open(fichero, 'r')
+        for line in archivo:
+            lista_ips.append(line[0:-1])
+        print "Lista de IPs cargada correctamente.\n"
+    except IOError:
+        print "No se puede abrir el archivo."
+
+
+# Obtiene la IP de F0 de una ip base
+def get_f0(ipbase):
+    ultimo = ip(ipbase.split('.')[-1]) + 2
+    f0 = ipbase.split('.')[0] + '.' + ipbase.split('.')[1] + '.' + ipbase.split('.')[2] + '.' + str(ultimo)
+    return f0
+
+
+# Escanea la lista de ips de un archivo, las guarda en un array
+def escanea():
+    global lista_ips
+    carga_en_array()
+    for i in lista_ips:
+
+
+
+# Aplicación principal
 while True:
     # Mostramos menú
     print menu()
@@ -29,7 +71,11 @@ while True:
         configurar()
 
     elif opcion == 2:
-        print opcion
+        if fichero == "":
+            print "No se ha establecido fichero de IPs"
+            break
+        else:
+            escanea()
 
     elif opcion == 3:
         print opcion
