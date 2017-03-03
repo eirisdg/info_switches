@@ -8,9 +8,22 @@
 
 
 from Utils.server import *
+from Utils.switch import *
 
-fichero = "/home/eirisdg/PycharmProjects/info-switches/lista_prueba"
+
+fichero = "/home/eirisdg/PycharmProjects/info-switches/prueba"
 lista_ips = []
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 # Función para imprimir menú
@@ -65,6 +78,15 @@ def escanea():
     for i in lista_ips:
         s = Server(get_f0(i))
         ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
+        for i in range(50, 40, -1):
+            stdin, stdout, stderr = ssh.exec_command("ping -c 1 192.168.4." + str(i) + " -w 1 | awk '/packet loss/ {print $6}'")
+            if stdout.read().rsplit()[0] == '0%':
+                print "Ping a " + str(i) + bcolors.OKGREEN + " OK" + bcolors.ENDC
+                tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(i))
+                print tipo
+            else:
+                print "Ping a " + str(i) + bcolors.FAIL + " KO" + bcolors.ENDC
+
         #s.command(ssh, 'ls -lah')
 
 
