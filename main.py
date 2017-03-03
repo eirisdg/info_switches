@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Dependencias:
+# - python2.7
+# - paramiko (pip install paramiko)
+# - python-pexpect (pip install git+https://github.com/fgimian/paramiko-expect.git)
+
 
 from Utils.server import *
 
