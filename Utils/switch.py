@@ -9,20 +9,43 @@ class Switch:
     @staticmethod
     def get_tipo(s,ssh, ipsw):
         tipo = ''
-        if Switch.is_d1510(s,ssh,ipsw):
+        #nmap
+        if Switch.is_3com(s,ssh,ipsw):
+            tipo = '3com'
+        #SSH
+        elif Switch.is_d1510(s,ssh,ipsw):
             tipo = 'DGS-1510-28'
         elif Switch.is_d121024(s, ssh, ipsw):
             tipo = 'DGS-1210-24'
+        elif Switch.is_d3427(s, ssh, ipsw):
+            tipo = 'DGS-3427'
+        #telnet
+        elif Switch.is_d121028(s, ssh, ipsw):
+            tipo = 'DGS-1210-28'
         return tipo
+
+
+    @staticmethod
+    def is_3com(s, ssh, ipsw):
+        com = None
+        stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
+        nmap = stdout.read()
+        if '3Com' in nmap:
+            com = True
+        else:
+            com = False
+        return com
+
 
     @staticmethod
     def is_d1510(s,ssh, ipsw):
         d1510 = None
-        sshtransport = ssh.get_transport()
-        local_addr = (s.f0, 22)
-        dest_addr = (ipsw, 22)
-        sshchannel = sshtransport.open_channel("direct-tcpip", dest_addr, local_addr)
         try:
+            sshtransport = ssh.get_transport()
+            local_addr = (s.f0, 22)
+            dest_addr = (ipsw, 22)
+            sshchannel = sshtransport.open_channel("direct-tcpip", dest_addr, local_addr)
+
             sw = SSHClient()
             sw.set_missing_host_key_policy(AutoAddPolicy())
             sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
@@ -38,8 +61,7 @@ class Switch:
                 d1510 = True
             else:
                 d1510 = False
-        except AuthenticationException:
-            #print "No he podido conectar al Switch " + str(ipsw)
+        except Exception:
             d1510 = False
         finally:
             return d1510
@@ -48,12 +70,13 @@ class Switch:
     @staticmethod
     def is_d121024(s, ssh, ipsw):
         d121028 = None
-        sshtransport = ssh.get_transport()
-        local_addr = (s.f0, 22)
-        dest_addr = (ipsw, 22)
-        sshchannel = sshtransport.open_channel("direct-tcpip", dest_addr, local_addr)
-
         try:
+            sshtransport = ssh.get_transport()
+            local_addr = (s.f0, 22)
+            dest_addr = (ipsw, 22)
+            sshchannel = sshtransport.open_channel("direct-tcpip", dest_addr, local_addr)
+
+
             sw = SSHClient()
             sw.set_missing_host_key_policy(AutoAddPolicy())
             sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
@@ -67,17 +90,53 @@ class Switch:
                 d121028 = True
             else:
                 d121028 = False
-        except AuthenticationException:
+        except Exception:
             d121028 = False
         finally:
             return d121028
 
-    #@staticmethod
-    #def is_d121024():
+    @staticmethod
+    def is_d121028(s, ssh, ipsw):
+        d121028 = None
+        command = "telnet " + str(ipsw)
+        stdin, stdout, stderr = ssh.exec_command(command)
 
+        stdin.write('''admin\nceycswtic\nlogout\n''')
 
-    #@staticmethod
-    #def is_d3427():
+        outlines = stdout.readlines()
+        resp = ''.join(outlines)
+        if 'DGS-1210-28' in resp:
+            d121028 = True
+        else:
+            d121028 = False
+        return d121028
+
+    @staticmethod
+    def is_d3427(s, ssh, ipsw):
+        d3427 = None
+        try:
+            sshtransport = ssh.get_transport()
+            local_addr = (s.f0, 22)
+            dest_addr = (ipsw, 22)
+            sshchannel = sshtransport.open_channel("direct-tcpip", dest_addr, local_addr)
+
+            sw = SSHClient()
+            sw.set_missing_host_key_policy(AutoAddPolicy())
+            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
+
+            interact = SSHClientInteraction(sw, timeout=10, display=True)
+            interact.expect('DGS-3427:4#')
+
+            modelo = interact.current_output_clean
+
+            if 'DGS-3427' in modelo:
+                d3427 = True
+            else:
+                d3427 = False
+        except Exception:
+            d121028 = False
+        finally:
+            return d3427
 
     #@staticmethod
     #def is_d3100():

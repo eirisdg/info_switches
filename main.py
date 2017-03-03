@@ -9,6 +9,12 @@
 
 from Utils.server import *
 from Utils.switch import *
+import logging
+
+# Para observar el log de paramiko usar siempre Logger
+logging.getLogger("paramiko").setLevel(logging.CRITICAL)
+# Guarda en un fichero los resultados
+util.log_to_file("paramiko.log")
 
 
 fichero = "/home/eirisdg/PycharmProjects/info-switches/prueba"
@@ -79,15 +85,15 @@ def escanea():
         s = Server(get_f0(i))
         ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
         for i in range(50, 40, -1):
-            stdin, stdout, stderr = ssh.exec_command("ping -c 1 192.168.4." + str(i) + " -w 1 | awk '/packet loss/ {print $6}'")
-            if stdout.read().rsplit()[0] == '0%':
+            command = "fping -c1 -t500 192.168.4." + str(i) + " | awk '/loss/ {print $1}'"
+            stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(i) + " ")
+            valor = stdout.read()
+            if valor is not '':
                 print "Ping a " + str(i) + bcolors.OKGREEN + " OK" + bcolors.ENDC
                 tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(i))
                 print tipo
             else:
                 print "Ping a " + str(i) + bcolors.FAIL + " KO" + bcolors.ENDC
-
-        #s.command(ssh, 'ls -lah')
 
 
 # Aplicación principal
