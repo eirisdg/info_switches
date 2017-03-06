@@ -5,7 +5,13 @@ from paramiko import *
 from paramiko_expect import *
 import time
 
-class Switch:
+class Switch(object):
+    f0 = ''
+    ipsw = ''
+
+    def __init__(self, f0, ipsw):
+        self.f0 = f0
+        self.ipsw = ipsw
 
     @staticmethod
     def get_tipo(s,ssh, ipsw):
@@ -14,7 +20,7 @@ class Switch:
         if Switch.is_3com(s,ssh,ipsw):
             tipo = '3com'
         #SSH
-        elif Switch.is_d1510(s,ssh,ipsw):
+        elif Switch.is_d151028(s,ssh,ipsw):
             tipo = 'DGS-1510-28'
         elif Switch.is_d121024(s, ssh, ipsw):
             tipo = 'DGS-1210-24'
@@ -45,7 +51,7 @@ class Switch:
 
     # SSH
     @staticmethod
-    def is_d1510(s,ssh, ipsw):
+    def is_d151028(s,ssh, ipsw):
         d1510 = None
         try:
             sshtransport = ssh.get_transport()
@@ -58,9 +64,9 @@ class Switch:
             sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=2)
 
             interact = SSHClientInteraction(sw, timeout=1, display=False)
-            interact.expect(['Switch#','Switch0#'])
+            interact.expect(['Switches#','Switch0#'])
             interact.send('show unit 1')
-            interact.expect(['Switch#','Switch0#'])
+            interact.expect(['Switches#','Switch0#'])
             interact.send('logout')
             modelo = interact.current_output_clean
 
@@ -192,3 +198,6 @@ class Switch:
         else:
             dell6224 = False
         return dell6224
+
+    def get_ports_status(self, ssh):
+        pass

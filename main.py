@@ -6,9 +6,10 @@
 # - paramiko (pip install paramiko)
 # - python-pexpect (pip install git+https://github.com/fgimian/paramiko-expect.git)
 
-
 from Utils.server import *
 from Utils.switch import *
+from Utils.Switches.d151028 import *
+
 import logging
 
 # Para observar el log de paramiko usar siempre Logger
@@ -85,18 +86,36 @@ def escanea():
         try:
             s = Server(get_f0(i))
             ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
-            for i in range(50, 40, -1):
-                command = "fping -c1 -t500 192.168.4." + str(i) + " | awk '/loss/ {print $1}'"
-                stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(i) + " ")
+            for j in range(50, 40, -1):
+                stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(j) + " ")
                 valor = stdout.read()
                 if valor is not '':
                     print "Ping a " + str(i) + bcolors.OKGREEN + " OK" + bcolors.ENDC
-                    tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(i))
-                    print tipo
+                    tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
+
+                    if tipo == 'DGS-1510-28':
+                        sw = D151028(s.f0, "192.168.4." + str(j))
+                        ports = sw.get_ports_status(ssh)
+                    elif tipo == 'DGS-1210-24':
+                        pass
+                    elif tipo == 'DGS-3427':
+                        pass
+                    elif tipo == 'Dell-6224':
+                        pass
+                    elif tipo == 'DGS-1210-28':
+                        pass
+                    elif tipo == 'DGS-3100':
+                        pass
+                    elif tipo == '3com':
+                        pass
+                    else:
+                        pass
+
+                    print ports
                 else:
                     print "Ping a " + str(i) + bcolors.FAIL + " KO" + bcolors.ENDC
-        except:
-            print("Servidor caído.")
+        except AuthenticationException as e:
+            print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
 
 # Aplicación principal
 if __name__ == "__main__":
