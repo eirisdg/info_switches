@@ -33,8 +33,6 @@ class Server:
                 print stdout.read().rstrip()
             except AuthenticationException:
                 print "No se ha podido conectar"
-        else:
-            print "Servidor caído"
         return ssh
 
 

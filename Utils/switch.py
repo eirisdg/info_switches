@@ -3,6 +3,7 @@
 
 from paramiko import *
 from paramiko_expect import *
+import time
 
 class Switch:
 
@@ -19,9 +20,15 @@ class Switch:
             tipo = 'DGS-1210-24'
         elif Switch.is_d3427(s, ssh, ipsw):
             tipo = 'DGS-3427'
-        #telnet
+        # telnet
+        elif Switch.is_dell6224(s, ssh, ipsw):
+            tipo = 'Dell-6224'
         elif Switch.is_d121028(s, ssh, ipsw):
             tipo = 'DGS-1210-28'
+        elif Switch.is_d3100(s, ssh, ipsw):
+            tipo = 'DGS-3100'
+        else:
+            tipo = "Desconocido"
         return tipo
 
 
@@ -36,7 +43,7 @@ class Switch:
             com = False
         return com
 
-
+    # SSH
     @staticmethod
     def is_d1510(s,ssh, ipsw):
         d1510 = None
@@ -48,15 +55,15 @@ class Switch:
 
             sw = SSHClient()
             sw.set_missing_host_key_policy(AutoAddPolicy())
-            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
+            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=2)
 
-            interact = SSHClientInteraction(sw, timeout=10, display=True)
-            interact.expect('Switch#')
+            interact = SSHClientInteraction(sw, timeout=1, display=False)
+            interact.expect(['Switch#','Switch0#'])
             interact.send('show unit 1')
-            interact.expect('Switch#')
+            interact.expect(['Switch#','Switch0#'])
+            interact.send('logout')
             modelo = interact.current_output_clean
-            interact.close()
-            sw.close()
+
             if 'DGS-1510-28' in modelo:
                 d1510 = True
             else:
@@ -66,7 +73,7 @@ class Switch:
         finally:
             return d1510
 
-
+    # SSH
     @staticmethod
     def is_d121024(s, ssh, ipsw):
         d121028 = None
@@ -76,13 +83,13 @@ class Switch:
             dest_addr = (ipsw, 22)
             sshchannel = sshtransport.open_channel("direct-tcpip", dest_addr, local_addr)
 
-
             sw = SSHClient()
             sw.set_missing_host_key_policy(AutoAddPolicy())
-            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
+            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=2)
 
-            interact = SSHClientInteraction(sw, timeout=10, display=True)
+            interact = SSHClientInteraction(sw, timeout=1, display=False)
             interact.expect('DGS-1210-24:admin#')
+            interact.send('logout')
 
             modelo = interact.current_output_clean
 
@@ -95,14 +102,13 @@ class Switch:
         finally:
             return d121028
 
+    # Telnet
     @staticmethod
     def is_d121028(s, ssh, ipsw):
         d121028 = None
         command = "telnet " + str(ipsw)
         stdin, stdout, stderr = ssh.exec_command(command)
-
         stdin.write('''admin\nceycswtic\nlogout\n''')
-
         outlines = stdout.readlines()
         resp = ''.join(outlines)
         if 'DGS-1210-28' in resp:
@@ -111,6 +117,7 @@ class Switch:
             d121028 = False
         return d121028
 
+    # SSH
     @staticmethod
     def is_d3427(s, ssh, ipsw):
         d3427 = None
@@ -122,22 +129,66 @@ class Switch:
 
             sw = SSHClient()
             sw.set_missing_host_key_policy(AutoAddPolicy())
-            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
+            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=2)
 
-            interact = SSHClientInteraction(sw, timeout=10, display=True)
-            interact.expect('DGS-3427:4#')
-
+            interact = SSHClientInteraction(sw, timeout=1, display=False)
+            interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
             modelo = interact.current_output_clean
+            interact.send('logout')
+            interact.expect()
 
             if 'DGS-3427' in modelo:
                 d3427 = True
             else:
                 d3427 = False
         except Exception:
-            d121028 = False
+            d3427 = False
         finally:
             return d3427
 
-    #@staticmethod
-    #def is_d3100():
+    # Telnet
+    @staticmethod
+    def is_d3100(s, ssh, ipsw):
+        d3100 = None
+        command = "telnet " + str(ipsw)
+        stdin, stdout, stderr = ssh.exec_command(command, timeout=2)
 
+        alldata = ""
+        stdout.channel.settimeout(2)
+        while not stdout.channel.exit_status_ready():
+            solo_line = ""
+            if stdout.channel.recv_ready():
+                solo_line = stdout.channel.recv(1024)
+                alldata += solo_line
+                print solo_line
+                if "User Name:" in solo_line:
+                    stdin.channel.send('admin\n')
+
+                if "Password:" in solo_line:
+                    stdin.channel.send('ceycswtic\n')
+
+                if "DGS-3100#" in solo_line:
+                    stdin.channel.send('logout\n')
+            time.sleep(3)
+            stdout.channel.close()
+
+        if 'DGS-3100' in alldata:
+            d3100 = True
+        else:
+            d3100 = False
+        return d3100
+
+    # Telnet
+    @staticmethod
+    def is_dell6224(s, ssh, ipsw):
+        dell6224 = None
+        command = "telnet " + str(ipsw)
+        stdin, stdout, stderr = ssh.exec_command(command)
+        stdin.write('''admin\nceycswtic\nshow system\nq\nlogout\n''')
+        outlines = stdout.readlines()
+        resp = ''.join(outlines)
+        if 'PowerConnect 6224' in resp or 'Dell 24 Port' in resp:
+            dell6224 = True
+        else:
+            dell6224 = False
+        return dell6224

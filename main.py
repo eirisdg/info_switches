@@ -82,19 +82,21 @@ def escanea():
     global lista_ips
     carga_en_array()
     for i in lista_ips:
-        s = Server(get_f0(i))
-        ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
-        for i in range(50, 40, -1):
-            command = "fping -c1 -t500 192.168.4." + str(i) + " | awk '/loss/ {print $1}'"
-            stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(i) + " ")
-            valor = stdout.read()
-            if valor is not '':
-                print "Ping a " + str(i) + bcolors.OKGREEN + " OK" + bcolors.ENDC
-                tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(i))
-                print tipo
-            else:
-                print "Ping a " + str(i) + bcolors.FAIL + " KO" + bcolors.ENDC
-
+        try:
+            s = Server(get_f0(i))
+            ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
+            for i in range(50, 40, -1):
+                command = "fping -c1 -t500 192.168.4." + str(i) + " | awk '/loss/ {print $1}'"
+                stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(i) + " ")
+                valor = stdout.read()
+                if valor is not '':
+                    print "Ping a " + str(i) + bcolors.OKGREEN + " OK" + bcolors.ENDC
+                    tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(i))
+                    print tipo
+                else:
+                    print "Ping a " + str(i) + bcolors.FAIL + " KO" + bcolors.ENDC
+        except:
+            print("Servidor caído.")
 
 # Aplicación principal
 if __name__ == "__main__":
