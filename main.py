@@ -95,7 +95,7 @@ def escanea():
                 stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(j) + " ")
                 valor = stdout.read()
                 if valor is not '':
-                    print "Ping a " + str(i) + bcolors.OKGREEN + " OK" + bcolors.ENDC
+                    print "Ping a 192.168.4." + str(j) + bcolors.OKGREEN + " OK" + bcolors.ENDC
                     tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
                     ports = ""
                     if tipo == 'DGS-1510-28':
@@ -117,13 +117,13 @@ def escanea():
                         sw = D3100(s.f0, "192.168.4." + str(j))
                         ports = sw.get_ports_status(ssh)
                     elif tipo == '3com':
-                        pass
+                        ports = 'Unknown'
                     else:
                         pass
 
                     print ports
                 else:
-                    print "Ping a " + str(i) + bcolors.FAIL + " KO" + bcolors.ENDC
+                    print "Ping a 192.168.4." + str(j) + bcolors.FAIL + " KO" + bcolors.ENDC
         except AuthenticationException as e:
             print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
 

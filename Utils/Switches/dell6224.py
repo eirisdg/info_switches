@@ -15,7 +15,26 @@ class Dell6224(Switch):
         resp = ''.join(outlines)
 
         stack = []
+        switch = []
+        switch.append('Dell-6224')
 
+        for line in resp.splitlines():
+            if 'Level' in line:
+                unit = line[0]
+                boca = line.split(unit + '/')[1][1:3]
+                if 'Up' in line:
+                    status = 'Up'
+                else:
+                    status = 'Down'
 
+                if len(switch) > 1 and unit != switch[-1][0]:
+                    stack.append(switch)
+                    switch = []
+                    switch.append('Dell-6224')
+                    switch.append([unit, boca, status])
+                else:
+                    switch.append([unit, boca, status])
+            elif 'Flow Control:' in line:
+                stack.append(switch)
 
-        return resp
+        return stack

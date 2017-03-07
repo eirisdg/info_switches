@@ -8,4 +8,12 @@ class D121028(Switch):
         super(D121028,self).__init__(f0, ipsw)
 
     def get_ports_status(self, ssh):
-        pass
+        command = "telnet " + str(ipsw)
+        stdin, stdout, stderr = ssh.exec_command(command)
+        stdin.write('''admin\nceycswtic\nlogout\n''')
+        outlines = stdout.readlines()
+        resp = ''.join(outlines)
+
+        stack = []
+
+        return stack
