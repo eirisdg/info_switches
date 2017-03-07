@@ -46,6 +46,4 @@ class D3427(Switch):
         for line in salida.splitlines():
             pass
 
-
-
         return salida
