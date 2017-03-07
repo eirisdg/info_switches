@@ -40,7 +40,6 @@ class D3427(Switch):
         #salida = interact.current_output_clean
         interact.close()
         sw.close()
-
         stack = []
         switch = []
 
