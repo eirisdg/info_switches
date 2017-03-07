@@ -6,6 +6,9 @@ from Utils.switch import Switch
 from paramiko import *
 from paramiko_expect import *
 
+def get_salida(s, salida):
+    return salida
+
 class D3427(Switch):
 
     def __init__(self, f0, ipsw):
@@ -21,29 +24,30 @@ class D3427(Switch):
         sw.set_missing_host_key_policy(AutoAddPolicy())
         sw.connect(self.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
 
+        salida = ''
         interact = SSHClientInteraction(sw, timeout=1, display=False)
         interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
-        interact.send('show ports\n')
-        interact.send('n')
-        interact.send('n')
-        interact.send('n')
-        interact.send('n')
-        interact.send('n')
-        interact.send('n')
+        interact.send('show ports')
         interact.send('n')
         interact.send('q')
-        salida = interact.current_output_clean
-        print salida
         interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
-        interact.send('logout\n')
-        interact.expect()
-        #salida = interact.current_output_clean
+        interact.send('logout')
+        salida = interact.current_output
         interact.close()
         sw.close()
         stack = []
         switch = []
-
+        switch.append('DGS-3427')
         for line in salida.splitlines():
-            pass
+            if 'Enabled' in line or 'Auto/Disabled' in line:
+                unit = 1
+                boca = line[1:3]
+                if 'Link Down' in line:
+                    status = 'Down'
+                else:
+                    status = 'Up'
+                switch.append([unit, boca, status])
 
-        return salida
+            if 'Notes:(F)indicates' in line:
+                stack.append(switch)
+        return stack
