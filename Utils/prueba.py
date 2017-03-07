@@ -1,60 +1,87 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from paramiko import *
+from paramiko_expect import *
+import time
 
-cadena = '''
-show ports
-Command: show ports
+import time
 
- Port      Port            Settings             Connection          Address
-           State     Speed/Duplex/FlowCtrl  Speed/Duplex/FlowCtrl   Learning
- -------  --------  ---------------------  ----------------------  ---------
- 1        Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 2        Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 3        Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 4        Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 5        Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 6        Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 7        Enabled   Auto/Disabled           Link Down               Enabled
- 8        Enabled   Auto/Disabled           Link Down               Enabled
- 9        Enabled   Auto/Disabled           Link Down               Enabled
- 10       Enabled   Auto/Disabled           Link Down               Enabled
- 11       Enabled   Auto/Disabled           Link Down               Enabled
- 12       Enabled   Auto/Disabled           Link Down               Enabled
- 13       Enabled   Auto/Disabled           Link Down               Enabled
- 14       Enabled   Auto/Disabled           Link Down               Enabled
- 15       Enabled   Auto/Disabled           Link Down               Enabled
- 16       Enabled   Auto/Disabled           Link Down               Enabled
- 17       Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 18       Enabled   Auto/Disabled           Link Down               Enabled
- 19       Enabled   Auto/Disabled           1000M/Full/None         Enabled
+from Utils.switch import Switch
 
-CTRL+C ESC q Quit SPACE n Next Page p Previous Page r Refresh
- 20       Enabled   Auto/Disabled           Link Down               Enabled
- 21   (C) Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 21   (F) Enabled   Auto/Disabled           Link Down               Enabled
- 22   (C) Enabled   Auto/Disabled           Link Down               Enabled
- 22   (F) Enabled   Auto/Disabled           Link Down               Enabled
- 23   (C) Enabled   Auto/Disabled           1000M/Full/None         Enabled
- 23   (F) Enabled   Auto/Disabled           Link Down               Enabled
- 24   (C) Enabled   Auto/Disabled           Link Down               Enabled
- 24   (F) Enabled   Auto/Disabled           Link Down               Enabled
- 25       Enabled   Auto/Disabled           Link Down               Enabled
- 26       Enabled   Auto/Disabled           Link Down               Enabled
- 27       Enabled   Auto/Disabled           Link Down               Enabled
+f0 = '10.213.36.226'
+username = 'root'
+password = 'marajad3'
+key = PKey('~/.ssh/id_dsa', password)
+
+ssh = SSHClient()
+ssh.set_missing_host_key_policy(AutoAddPolicy())
+ssh.connect(f0, username=username, password=password, timeout=10, pkey=key)
+
+command = "telnet 192.168.5.49"
+stdin, stdout, stderr = ssh.exec_command(command, timeout=2)
+
+contador = 0
+alldata = ""
+stdout.channel.settimeout(4)
+while not stdout.channel.exit_status_ready():
+    solo_line = ""
+    if stdout.channel.recv_ready():
+        solo_line = stdout.channel.recv(3048)
+        print solo_line
+        alldata += solo_line
+        print solo_line
+        if "User Name:" in solo_line:
+            stdin.channel.send('admin\n')
+        time.sleep(1)
+        if "Password:" in solo_line:
+            stdin.channel.send('ceycswtic\n')
+        time.sleep(5)
+        #stdin.channel.send('shows ports\n')
+        if "DGS-3100#" in solo_line:
+            stdin.channel.send('show ports\n')
+            #time.sleep(1)
+            stdin.channel.send('a')
+            #stdin.channel.send('a')
+            contador += 1
+        if contador is 2:
+            #stdin.channel.send('logout\n')
+            stdout.channel.close()
+time.sleep(3)
+stdout.channel.close()
+
+print alldata
+
+
+for line in alldata.splitlines():
+            if 'Enabled' in line:
+                unit = line[0]
+                unit = int(unit)
+                #print unit
+                boca = line.split(':')[1][0:2]
+                print boca
+                #unit += 1
+                #boca = line.split('Learnt   Gi')[1][2:4]
+                #if boca[1] == ' ':
+                #    boca = boca[0]
+                status = 'Up'
 
 
 
+#for line in alldata.splitlines():
+            #                if 'Enabled' in line:
+            #           unit = line[0]
+            #      #print unit
+            #    boca = line.split(unit + '/')[1][1:3]
+            #   if 'Full' in line:
+            #      status = 'Up'
+            #    else:
+            #       status = 'Down'
 
-
-
-Notes:(F)indicates fiber medium and (C)indicates copper medium in a combo port'''
-
-for line in cadena.splitlines():
-    if 'Enabled' in line or 'Auto/Disabled' in line:
-        unit = 1
-        boca = line[1:3]
-        if 'Link Down' in line:
-            status = 'Down'
-        else:
-            status = 'Up'
-
-        print([unit, boca, status])
+            #     if len(switch) > 1 and unit != switch[-1][0]:
+            #         stack.append(switch)
+            #        switch = []
+            #       switch.append('DGS-3100')
+            #      switch.append([unit, boca, status])
+            #    else:
+            #        switch.append([unit, boca, status])
+   # stack.append(alldata)
