@@ -42,6 +42,8 @@ class D3427(Switch):
             if 'Enabled' in line or 'Auto/Disabled' in line:
                 unit = 1
                 boca = line[1:3]
+                if '(F)' in line:
+                    boca += 'F'
                 if 'Link Down' in line:
                     status = 'Down'
                 else:

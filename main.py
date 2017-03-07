@@ -87,13 +87,19 @@ def get_f0(ipbase):
 def escanea():
     global lista_ips
     carga_en_array()
+    servers = []
     for i in lista_ips:
         try:
             s = Server(get_f0(i))
             ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
+            ip = s.get_ip(i)
+            codigo_centro = s.get_codigo_centro(ssh)
+            nombre_centro = s.get_nombre_centro(ssh)
+            stack = [ip, nombre_centro, codigo_centro]
             for j in range(50, 40, -1):
                 stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(j) + " ")
                 valor = stdout.read()
+
                 if valor is not '':
                     print "Ping a 192.168.4." + str(j) + bcolors.OKGREEN + " OK" + bcolors.ENDC
                     tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
@@ -119,13 +125,15 @@ def escanea():
                     elif tipo == '3com':
                         ports = '3com'
                     else:
-                        pass
+                        ports = 'unknown'
 
-                    print ports
+                    stack.append(ports)
                 else:
                     print "Ping a 192.168.4." + str(j) + bcolors.FAIL + " KO" + bcolors.ENDC
+            servers.append(stack)
         except AuthenticationException as e:
             print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
+    print(servers)
 
 # Aplicación principal
 if __name__ == "__main__":
