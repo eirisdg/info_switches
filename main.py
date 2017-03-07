@@ -9,6 +9,11 @@
 from Utils.server import *
 from Utils.switch import *
 from Utils.Switches.d151028 import *
+from Utils.Switches.dell6224 import *
+from Utils.Switches.d121024 import *
+from Utils.Switches.d3427 import *
+from Utils.Switches.d121028 import *
+from Utils.Switches.d3100 import *
 
 import logging
 
@@ -92,20 +97,25 @@ def escanea():
                 if valor is not '':
                     print "Ping a " + str(i) + bcolors.OKGREEN + " OK" + bcolors.ENDC
                     tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
-
+                    ports = ""
                     if tipo == 'DGS-1510-28':
                         sw = D151028(s.f0, "192.168.4." + str(j))
                         ports = sw.get_ports_status(ssh)
                     elif tipo == 'DGS-1210-24':
-                        pass
+                        sw = D121024(s.f0, "192.168.4." + str(j))
+                        ports = sw.get_ports_status(ssh)
                     elif tipo == 'DGS-3427':
-                        pass
+                        sw = D3427(s.f0, "192.168.4." + str(j))
+                        ports = sw.get_ports_status(ssh)
                     elif tipo == 'Dell-6224':
-                        pass
+                        sw = Dell6224(s.f0, "192.168.4." + str(j))
+                        ports = sw.get_ports_status(ssh)
                     elif tipo == 'DGS-1210-28':
-                        pass
+                        sw = D121028(s.f0, "192.168.4." + str(j))
+                        ports = sw.get_ports_status(ssh)
                     elif tipo == 'DGS-3100':
-                        pass
+                        sw = D3100(s.f0, "192.168.4." + str(j))
+                        ports = sw.get_ports_status(ssh)
                     elif tipo == '3com':
                         pass
                     else:
