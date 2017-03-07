@@ -15,5 +15,4 @@ class D121028(Switch):
         resp = ''.join(outlines)
 
         stack = []
-
         return stack
