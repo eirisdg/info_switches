@@ -55,6 +55,12 @@ class Server:
         codigo = stdout.read().split('CODIGO=')[1][0:-1]
         return codigo
 
+    # E20 o TIC
+    def get_tipo_centro(self, ssh):
+        stdin, stdout, stderr = ssh.exec_command('cat /etc/puppet/data/info_centro | grep TIPO_CENTRO=')
+        codigo = stdout.read().split('TIPO_CENTRO=')[1][0:-1]
+        return codigo
+
     # Método de cierre de una conexión
     def close(self, ssh):
         ssh.close()

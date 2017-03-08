@@ -43,7 +43,7 @@ class Switch(object):
         com = None
         stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
         nmap = stdout.read()
-        if '3Com' in nmap:
+        if '3Com' in nmap or '3com' in nmap:
             com = True
         else:
             com = False
@@ -69,6 +69,8 @@ class Switch(object):
             interact.expect(['Switch#','Switch0#'])
             interact.send('logout')
             modelo = interact.current_output_clean
+            interact.close()
+            sw.close()
 
             if 'DGS-1510-28' in modelo:
                 d1510 = True
@@ -98,6 +100,8 @@ class Switch(object):
             interact.send('logout')
 
             modelo = interact.current_output_clean
+            interact.close()
+            sw.close()
 
             if 'DGS-1210-24' in modelo:
                 d121028 = True
