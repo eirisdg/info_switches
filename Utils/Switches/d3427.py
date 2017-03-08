@@ -26,13 +26,16 @@ class D3427(Switch):
 
         salida = ''
         interact = SSHClientInteraction(sw, timeout=1, display=False)
+        interact.send('\n')
         interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
-        interact.send('show ports')
+        interact.send('show ports\n')
         interact.send('n')
         interact.send('q')
+        interact.send('\n')
         interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
-        interact.send('logout')
         salida = interact.current_output
+        interact.send('\n')
+        interact.send('logout')
         interact.close()
         sw.close()
         stack = []
@@ -42,6 +45,8 @@ class D3427(Switch):
             if 'Enabled' in line or 'Auto/Disabled' in line:
                 unit = 1
                 boca = line[1:3]
+                if '(F)' in line:
+                    boca += 'F'
                 if 'Link Down' in line:
                     status = 'Down'
                 else:
