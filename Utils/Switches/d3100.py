@@ -30,7 +30,7 @@ class D3100(Switch):
                 if contador is 2:
                     stdout.channel.close()
         stack = []
-        switch = ['DGS-3100']
+        switch = ['DGS-3100', str(self.ipsw)]
         for line in alldata.splitlines():
             if 'Enabled' in line:
                 unit = line[0]
