@@ -38,6 +38,8 @@ class D151028(Switch):
             if 'eth' in line:
                 unit = line.split('eth')[1][0]
                 boca = line.split('eth')[1][4:6]
+                if boca[1] == ' ':
+                    boca = boca[0]
                 if 'not-connected' in line:
                     status = 'Down'
                 else:

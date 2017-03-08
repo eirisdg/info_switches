@@ -30,9 +30,30 @@ interact.send('n')
 interact.send('q')
 interact.send('logout')
 interact.expect()
-modelo = interact.current_output
+salida = interact.current_output
 interact.close()
 sw.close()
 ssh.close()
 
-print modelo
+stack = []
+switch = []
+switch.append('DGS-3427')
+switch.append(str(ipsw))
+for line in salida.splitlines():
+    if 'Enabled' in line or 'Auto/Disabled' in line:
+        unit = 1
+        boca = line[1:3]
+        if boca[1] == ' ':
+            boca = boca[0]
+        if '(F)' in line:
+            boca += 'F'
+        if 'Link Down' in line:
+            status = 'Down'
+        else:
+            status = 'Up'
+        switch.append([unit, boca, status])
+
+    if 'Notes:(F)indicates' in line:
+        stack.append(switch)
+
+print stack

@@ -22,6 +22,8 @@ class Dell6224(Switch):
             if 'Level' in line:
                 unit = line[0]
                 boca = line.split(unit + '/')[1][1:3]
+                if boca[1] == ' ':
+                    boca = boca[0]
                 if 'Up' in line:
                     status = 'Up'
                 else:
