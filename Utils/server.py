@@ -4,7 +4,7 @@
 
 from paramiko import *
 import os
-from paramiko_expect import *
+import subprocess
 
 
 class Server:
@@ -21,16 +21,28 @@ class Server:
         self.username = 'root'
         self.password = 'marajad3'
 
+    # Método para lanzar ping
+    @staticmethod
+    def ping(host):
+        with open(os.devnull, 'w') as DEVNULL:
+            try:
+                subprocess.check_call(
+                    ['ping', '-c', '1', '-W', '1', '-i', '0.2', str(host)],
+                    stdout=DEVNULL,  # suppress output
+                    stderr=DEVNULL
+                )
+                is_up = True
+            except subprocess.CalledProcessError:
+                is_up = False
+        return is_up
 
     # Método de creación de una conexión
     def connect(self, ssh, f0, username, password, key):
-        ping = os.system("ping -c 1 " + f0 + " >/dev/null")
-        if ping == 0:
-            try:
-                ssh = SSHClient()
-                ssh.set_missing_host_key_policy(AutoAddPolicy())
-                ssh.connect(f0, username=username, password=password, timeout=10, pkey=key)
-            except AuthenticationException:
+        try:
+            ssh = SSHClient()
+            ssh.set_missing_host_key_policy(AutoAddPolicy())
+            ssh.connect(f0, username=username, password=password, timeout=10, pkey=key)
+        except AuthenticationException:
                 print "No se ha podido conectar"
         return ssh
 

@@ -26,13 +26,16 @@ class D3427(Switch):
 
         salida = ''
         interact = SSHClientInteraction(sw, timeout=1, display=False)
+        interact.send('\n')
         interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
-        interact.send('show ports')
+        interact.send('show ports\n')
         interact.send('n')
         interact.send('q')
+        interact.send('\n')
         interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
-        interact.send('logout')
         salida = interact.current_output
+        interact.send('\n')
+        interact.send('logout')
         interact.close()
         sw.close()
         stack = []
