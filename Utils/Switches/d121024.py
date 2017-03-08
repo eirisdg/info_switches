@@ -46,6 +46,7 @@ class D121024(Switch):
         print sw
         switch2 = []
         switch2.append('DGS-1210-24')
+        switch2.append(str(self.ipsw))
         for i in range(1, 25, +1):
             unit = 1
             boca = i

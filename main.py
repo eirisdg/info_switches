@@ -7,7 +7,6 @@
 # - python-pexpect (pip install git+https://github.com/fgimian/paramiko-expect.git)
 
 from Utils.server import *
-from Utils.switch import *
 from Utils.Switches.d151028 import *
 from Utils.Switches.dell6224 import *
 from Utils.Switches.d121024 import *
@@ -87,45 +86,65 @@ def get_f0(ipbase):
 def escanea():
     global lista_ips
     carga_en_array()
+    servers = []
     for i in lista_ips:
-        try:
-            s = Server(get_f0(i))
-            ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
-            for j in range(50, 40, -1):
-                stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(j) + " ")
-                valor = stdout.read()
-                if valor is not '':
-                    print "Ping a 192.168.4." + str(j) + bcolors.OKGREEN + " OK" + bcolors.ENDC
-                    tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
-                    ports = ""
-                    if tipo == 'DGS-1510-28':
-                        sw = D151028(s.f0, "192.168.4." + str(j))
-                        ports = sw.get_ports_status(ssh)
-                    elif tipo == 'DGS-1210-24':
-                        sw = D121024(s.f0, "192.168.4." + str(j))
-                        ports = sw.get_ports_status(ssh)
-                    elif tipo == 'DGS-3427':
-                        sw = D3427(s.f0, "192.168.4." + str(j))
-                        ports = sw.get_ports_status(ssh)
-                    elif tipo == 'Dell-6224':
-                        sw = Dell6224(s.f0, "192.168.4." + str(j))
-                        ports = sw.get_ports_status(ssh)
-                    elif tipo == 'DGS-1210-28':
-                        sw = D121028(s.f0, "192.168.4." + str(j))
-                        ports = sw.get_ports_status(ssh)
-                    elif tipo == 'DGS-3100':
-                        sw = D3100(s.f0, "192.168.4." + str(j))
-                        ports = sw.get_ports_status(ssh)
-                    elif tipo == '3com':
-                        ports = '3com'
-                    else:
-                        pass
+        s = Server(get_f0(i))
+        if Server.ping(s.f0):
+            try:
+                ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
+                ip = s.get_ip(i)
+                codigo_centro = s.get_codigo_centro(ssh)
+                tipo = s.get_tipo_centro(ssh)
+                print "\n\n===================================================\nConectado a centro " + codigo_centro + " con ip " + i + "\n==================================================="
+                if tipo != 'E20':
+                    stack = [ip, tipo, codigo_centro]
+                    for j in range(50, 40, -1):
+                        stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(j) + " ")
+                        valor = stdout.read()
+                        if valor is not '':
+                            print "Ping a 192.168.4." + str(j) + bcolors.OKGREEN + " OK" + bcolors.ENDC
+                            tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
+                            ports = ""
+                            print tipo
+                            if tipo == 'DGS-1510-28':
+                                sw = D151028(s.f0, "192.168.4." + str(j))
+                                ports = sw.get_ports_status(ssh)
+                            elif tipo == 'DGS-1210-24':
+                                sw = D121024(s.f0, "192.168.4." + str(j))
+                                ports = sw.get_ports_status(ssh)
+                            elif tipo == 'DGS-3427':
+                                sw = D3427(s.f0, "192.168.4." + str(j))
+                                ports = sw.get_ports_status(ssh)
+                            elif tipo == 'Dell-6224':
+                                sw = Dell6224(s.f0, "192.168.4." + str(j))
+                                ports = sw.get_ports_status(ssh)
+                            elif tipo == 'DGS-1210-28':
+                                sw = D121028(s.f0, "192.168.4." + str(j))
+                                ports = sw.get_ports_status(ssh)
+                            elif tipo == 'DGS-3100':
+                                sw = D3100(s.f0, "192.168.4." + str(j))
+                                ports = sw.get_ports_status(ssh)
+                            elif tipo == '3com':
+                                ports = [['3com', '192.168.4.' + str(j)]]
+                            else:
+                                ports = 'unknown'
 
-                    print ports
+                            stack.append(ports)
+                        else:
+                            print "Ping a 192.168.4." + str(j) + bcolors.FAIL + " KO" + bcolors.ENDC
+                    if len(stack) < 3:
+                        stack.append('Sin switches')
+                    else:
+                        servers.append(stack)
                 else:
-                    print "Ping a 192.168.4." + str(j) + bcolors.FAIL + " KO" + bcolors.ENDC
-        except AuthenticationException as e:
-            print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
+                    stack = [ip, tipo, codigo_centro]
+                print stack
+            except AuthenticationException as e:
+                print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
+        else:
+            print "Servidor caído " + i
+            servers.append([str(i), 'Sin conexión'])
+    print(servers)
 
 # Aplicación principal
 if __name__ == "__main__":

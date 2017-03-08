@@ -35,6 +35,7 @@ class D121028(Switch):
         #print unitmax
         switch2 = []
         switch2.append('DGS-1210-28')
+        switch2.append(str(self.ipsw))
         for a in range(0, unitmax, +1):
             for i in range(1, 29, +1):
                 unit = 1

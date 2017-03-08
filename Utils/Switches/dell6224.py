@@ -17,11 +17,13 @@ class Dell6224(Switch):
         stack = []
         switch = []
         switch.append('Dell-6224')
-
+        switch.append(str(self.ipsw))
         for line in resp.splitlines():
             if 'Level' in line:
                 unit = line[0]
                 boca = line.split(unit + '/')[1][1:3]
+                if boca[1] == ' ':
+                    boca = boca[0]
                 if 'Up' in line:
                     status = 'Up'
                 else:
@@ -31,10 +33,11 @@ class Dell6224(Switch):
                     stack.append(switch)
                     switch = []
                     switch.append('Dell-6224')
+                    switch.append(str(self.ipsw))
                     switch.append([unit, boca, status])
                 else:
                     switch.append([unit, boca, status])
-            elif 'Flow Control:' in line:
+            elif 'console>logout' in line:
                 stack.append(switch)
 
         return stack

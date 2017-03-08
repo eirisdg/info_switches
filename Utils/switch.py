@@ -43,7 +43,7 @@ class Switch(object):
         com = None
         stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
         nmap = stdout.read()
-        if '3Com' in nmap:
+        if '3Com' in nmap or '3com' in nmap:
             com = True
         else:
             com = False
@@ -64,11 +64,13 @@ class Switch(object):
             sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=2)
 
             interact = SSHClientInteraction(sw, timeout=1, display=False)
-            interact.expect(['Switches#','Switch0#'])
+            interact.expect(['Switch#','Switch0#'])
             interact.send('show unit 1')
-            interact.expect(['Switches#','Switch0#'])
+            interact.expect(['Switch#','Switch0#'])
             interact.send('logout')
             modelo = interact.current_output_clean
+            interact.close()
+            sw.close()
 
             if 'DGS-1510-28' in modelo:
                 d1510 = True
@@ -98,6 +100,8 @@ class Switch(object):
             interact.send('logout')
 
             modelo = interact.current_output_clean
+            interact.close()
+            sw.close()
 
             if 'DGS-1210-24' in modelo:
                 d121028 = True
@@ -135,13 +139,15 @@ class Switch(object):
 
             sw = SSHClient()
             sw.set_missing_host_key_policy(AutoAddPolicy())
-            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=2)
+            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=4)
 
             interact = SSHClientInteraction(sw, timeout=1, display=False)
             interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
             modelo = interact.current_output_clean
             interact.send('logout')
             interact.expect()
+            interact.close()
+            sw.close()
 
             if 'DGS-3427' in modelo:
                 d3427 = True
