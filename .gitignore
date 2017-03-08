@@ -1,3 +1,6 @@
 /.idea
 /paramiko.log
 /Utils/prueba.csv
+/*.pyc
+/Utils/*.pyc
+/Utils/Switches/*.pyc

@@ -16,8 +16,8 @@ class Dell6224(Switch):
 
         stack = []
         switch = []
-        switch.append('Dell-6224', str(self.ipsw))
-
+        switch.append('Dell-6224')
+        switch.append(str(self.ipsw))
         for line in resp.splitlines():
             if 'Level' in line:
                 unit = line[0]
@@ -30,7 +30,8 @@ class Dell6224(Switch):
                 if len(switch) > 1 and unit != switch[-1][0]:
                     stack.append(switch)
                     switch = []
-                    switch.append('Dell-6224', str(self.ipsw))
+                    switch.append('Dell-6224')
+                    switch.append(str(self.ipsw))
                     switch.append([unit, boca, status])
                 else:
                     switch.append([unit, boca, status])

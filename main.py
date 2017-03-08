@@ -125,7 +125,7 @@ def escanea():
                             sw = D3100(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
                         elif tipo == '3com':
-                            ports = '3com'
+                            ports = ['3com', '192.168.4.' + str(j)]
                         else:
                             ports = 'unknown'
 
