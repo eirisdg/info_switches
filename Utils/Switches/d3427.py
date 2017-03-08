@@ -40,7 +40,8 @@ class D3427(Switch):
         sw.close()
         stack = []
         switch = []
-        switch.append('DGS-3427', str(self.ipsw))
+        switch.append('DGS-3427')
+        switch.append(str(self.ipsw))
         for line in salida.splitlines():
             if 'Enabled' in line or 'Auto/Disabled' in line:
                 unit = 1
