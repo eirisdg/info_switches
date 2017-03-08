@@ -64,9 +64,9 @@ class Switch(object):
             sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=2)
 
             interact = SSHClientInteraction(sw, timeout=1, display=False)
-            interact.expect(['Switches#','Switch0#'])
+            interact.expect(['Switch#','Switch0#'])
             interact.send('show unit 1')
-            interact.expect(['Switches#','Switch0#'])
+            interact.expect(['Switch#','Switch0#'])
             interact.send('logout')
             modelo = interact.current_output_clean
 

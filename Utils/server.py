@@ -55,11 +55,6 @@ class Server:
         codigo = stdout.read().split('CODIGO=')[1][0:-1]
         return codigo
 
-    def get_nombre_centro(self, ssh):
-        stdin, stdout, stderr = ssh.exec_command('cat /etc/puppet/data/info_centro | grep NOMBRE=')
-        nombre = stdout.read().split('NOMBRE=')[1][0:-1]
-        return nombre
-
     # Método de cierre de una conexión
     def close(self, ssh):
         ssh.close()

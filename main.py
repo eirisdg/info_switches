@@ -24,7 +24,7 @@ logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 util.log_to_file("paramiko.log")
 
 
-fichero = "/home/eirisdg/PycharmProjects/info-switches/lista_prueba"
+fichero = "/home/jesus/PycharmProjects/info-switches/lista_prueba"
 lista_ips = []
 
 
@@ -96,8 +96,7 @@ def escanea():
                 ssh = s.connect(s.ssh, s.f0, s.username, s.password, s.key)
                 ip = s.get_ip(i)
                 codigo_centro = s.get_codigo_centro(ssh)
-                nombre_centro = s.get_nombre_centro(ssh)
-                stack = [ip, nombre_centro, codigo_centro]
+                stack = [ip, codigo_centro]
                 print "\n\n===================================================\nConectado a centro " + codigo_centro + " con ip " + i + "\n==================================================="
                 for j in range(50, 40, -1):
                     stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(j) + " ")

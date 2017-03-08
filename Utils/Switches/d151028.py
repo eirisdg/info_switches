@@ -32,7 +32,7 @@ class D151028(Switch):
 
         stack = []
         switch = []
-        switch.append('DGS-1510-28')
+        switch.append('DGS-1510-28', str(self.ipsw))
         for line in salida.splitlines():
             if 'eth' in line:
                 unit = line.split('eth')[1][0]
@@ -45,7 +45,7 @@ class D151028(Switch):
                 if len(switch) > 1 and unit != switch[-1][0]:
                     stack.append(switch)
                     switch = []
-                    switch.append('DGS-1510')
+                    switch.append('DGS-1510', str(self.ipsw))
                     switch.append([unit, boca, status])
                 else:
                     switch.append([unit, boca, status])
