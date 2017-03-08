@@ -27,61 +27,39 @@ while not stdout.channel.exit_status_ready():
     solo_line = ""
     if stdout.channel.recv_ready():
         solo_line = stdout.channel.recv(3048)
-        print solo_line
         alldata += solo_line
-        print solo_line
         if "User Name:" in solo_line:
             stdin.channel.send('admin\n')
-        time.sleep(1)
         if "Password:" in solo_line:
             stdin.channel.send('ceycswtic\n')
-        time.sleep(5)
-        #stdin.channel.send('shows ports\n')
         if "DGS-3100#" in solo_line:
             stdin.channel.send('show ports\n')
-            #time.sleep(1)
             stdin.channel.send('a')
-            #stdin.channel.send('a')
             contador += 1
         if contador is 2:
-            #stdin.channel.send('logout\n')
             stdout.channel.close()
-time.sleep(3)
-stdout.channel.close()
+
 
 print alldata
 
 
+
+stack = []
+switch = []
+switch.append('DGS-3100')
 for line in alldata.splitlines():
             if 'Enabled' in line:
                 unit = line[0]
-                unit = int(unit)
-                #print unit
                 boca = line.split(':')[1][0:2]
-                print boca
-                #unit += 1
-                #boca = line.split('Learnt   Gi')[1][2:4]
-                #if boca[1] == ' ':
-                #    boca = boca[0]
-                status = 'Up'
+                if boca[1] == ' ':
+                    boca = boca[0]
+                if 'Link Down' in line:
+                    status = 'Down'
+                    switch.append([unit, boca, 'Down'])
+                else:
+                    status = 'Up'
+                    switch.append([unit, boca, 'Up'])
 
+stack.append(switch)
 
-
-#for line in alldata.splitlines():
-            #                if 'Enabled' in line:
-            #           unit = line[0]
-            #      #print unit
-            #    boca = line.split(unit + '/')[1][1:3]
-            #   if 'Full' in line:
-            #      status = 'Up'
-            #    else:
-            #       status = 'Down'
-
-            #     if len(switch) > 1 and unit != switch[-1][0]:
-            #         stack.append(switch)
-            #        switch = []
-            #       switch.append('DGS-3100')
-            #      switch.append([unit, boca, status])
-            #    else:
-            #        switch.append([unit, boca, status])
-   # stack.append(alldata)
+print stack
