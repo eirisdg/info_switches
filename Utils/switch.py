@@ -135,13 +135,15 @@ class Switch(object):
 
             sw = SSHClient()
             sw.set_missing_host_key_policy(AutoAddPolicy())
-            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=2)
+            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=4)
 
             interact = SSHClientInteraction(sw, timeout=1, display=False)
             interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
             modelo = interact.current_output_clean
             interact.send('logout')
             interact.expect()
+            interact.close()
+            sw.close()
 
             if 'DGS-3427' in modelo:
                 d3427 = True

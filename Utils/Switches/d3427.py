@@ -25,19 +25,31 @@ class D3427(Switch):
         sw.connect(self.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
 
         salida = ''
+
         interact = SSHClientInteraction(sw, timeout=1, display=False)
         interact.send('\n')
         interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
-        interact.send('show ports\n')
-        interact.send('n')
-        interact.send('q')
-        interact.send('\n')
-        interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
-        salida = interact.current_output
-        interact.send('\n')
-        interact.send('logout')
+        modelo = interact.current_output
+
+        if '1.20-B23' in modelo:
+            interact.send('show ports\n')
+            interact.send('n')
+            interact.send('q')
+            interact.send('\n')
+            interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
+            salida = interact.current_output
+            interact.send('\n')
+            interact.send('logout')
+        else:
+            interact.send('show ports')
+            interact.send('n')
+            interact.send('q')
+            interact.send('logout')
+            interact.expect()
+            salida = interact.current_output
         interact.close()
         sw.close()
+
         stack = []
         switch = []
         switch.append('DGS-3427')

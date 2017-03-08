@@ -5,10 +5,8 @@
 # - python2.7
 # - paramiko (pip install paramiko)
 # - python-pexpect (pip install git+https://github.com/fgimian/paramiko-expect.git)
-# - fping (en local y remoto) (apt-get install fping)
 
 from Utils.server import *
-from Utils.switch import *
 from Utils.Switches.d151028 import *
 from Utils.Switches.dell6224 import *
 from Utils.Switches.d121024 import *
@@ -24,7 +22,7 @@ logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 util.log_to_file("paramiko.log")
 
 
-fichero = "/home/jesus/PycharmProjects/info-switches/lista_prueba"
+fichero = "/home/eirisdg/PycharmProjects/info-switches/lista_prueba"
 lista_ips = []
 
 
@@ -125,7 +123,7 @@ def escanea():
                             sw = D3100(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
                         elif tipo == '3com':
-                            ports = ['3com', '192.168.4.' + str(j)]
+                            ports = [['3com', '192.168.4.' + str(j)]]
                         else:
                             ports = 'unknown'
 
