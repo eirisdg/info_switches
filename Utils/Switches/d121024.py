@@ -43,7 +43,6 @@ class D121024(Switch):
                     boca = boca[0:2]
                 status = 'Up'
                 switch1.append([unit, boca, status])
-        print sw
         switch2 = []
         switch2.append('DGS-1210-24')
         switch2.append(str(self.ipsw))

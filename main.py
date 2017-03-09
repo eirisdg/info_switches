@@ -51,7 +51,7 @@ def menu():
             " 0. Salir\n"
             "====================")
 
-
+# Configura el fichero de ips
 def configurar():
     global fichero
     fichero = raw_input("Introduce la ruta del fichero de IPs: ")
@@ -99,7 +99,7 @@ def escanea():
                 if tipo != 'E20':
                     stack = [ip, tipo, codigo_centro]
                     for j in range(50, 40, -1):
-                        stdin, stdout, stderr = ssh.exec_command("fping -c1 -t500 192.168.4." + str(j) + " ")
+                        stdin, stdout, stderr = ssh.exec_command("fping -c1 -t100 192.168.4." + str(j) + " ")
                         valor = stdout.read()
                         if valor is not '':
                             print "Ping a 192.168.4." + str(j) + bcolors.OKGREEN + " OK" + bcolors.ENDC
@@ -126,6 +126,8 @@ def escanea():
                                 ports = sw.get_ports_status(ssh)
                             elif tipo == '3com':
                                 ports = [['3com', '192.168.4.' + str(j)]]
+                            elif tipo == 'Allied Telesyn':
+                                ports = [['Allied Telesyn, 195.168.4.' + str(j)]]
                             else:
                                 ports = 'unknown'
 
