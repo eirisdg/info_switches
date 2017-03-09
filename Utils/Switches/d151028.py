@@ -48,7 +48,7 @@ class D151028(Switch):
                 if len(switch) > 1 and unit != switch[-1][0]:
                     stack.append(switch)
                     switch = []
-                    switch.append('DGS-1510')
+                    switch.append('DGS-1510-28')
                     switch.append(str(self.ipsw))
                     switch.append([unit, boca, status])
                 else:
