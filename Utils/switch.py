@@ -24,10 +24,10 @@ class Switch(object):
         #SSH
         elif Switch.is_d151028(s,ssh,ipsw):
             tipo = 'DGS-1510-28'
-        elif Switch.is_d121024(s, ssh, ipsw):
-            tipo = 'DGS-1210-24'
         elif Switch.is_d3427(s, ssh, ipsw):
             tipo = 'DGS-3427'
+        elif Switch.is_d121024(s, ssh, ipsw):
+            tipo = 'DGS-1210-24'
         # telnet
         elif Switch.is_dell6224(s, ssh, ipsw):
             tipo = 'Dell-6224'
@@ -130,15 +130,21 @@ class Switch(object):
     def is_d121028(s, ssh, ipsw):
         d121028 = None
         command = "telnet " + str(ipsw)
-        stdin, stdout, stderr = ssh.exec_command(command)
-        stdin.write('''admin\nceycswtic\nlogout\n''')
-        outlines = stdout.readlines()
-        resp = ''.join(outlines)
-        if 'DGS-1210-28' in resp:
-            d121028 = True
-        else:
+        try:
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=2)
+            stdin.write('''admin\nceycswtic\nlogout\n''')
+            outlines = stdout.readlines()
+            resp = ''.join(outlines)
+            if 'DGS-1210-28' in resp:
+                d121028 = True
+            else:
+                d121028 = False
+            return d121028
+        except:
             d121028 = False
-        return d121028
+        finally:
+            return d121028
+
 
     # SSH
     @staticmethod
@@ -152,7 +158,7 @@ class Switch(object):
 
             sw = SSHClient()
             sw.set_missing_host_key_policy(AutoAddPolicy())
-            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=4)
+            sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=3)
 
             interact = SSHClientInteraction(sw, timeout=1, display=False)
             interact.expect(['DGS-3427:5#', 'DGS-3427:4#', 'DGS-3427:admin#'])
@@ -171,52 +177,62 @@ class Switch(object):
         finally:
             return d3427
 
+
     # Telnet
     @staticmethod
     def is_d3100(s, ssh, ipsw):
         d3100 = None
         command = "telnet " + str(ipsw)
-        stdin, stdout, stderr = ssh.exec_command(command, timeout=2)
+        try:
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=2)
 
-        alldata = ""
-        stdout.channel.settimeout(2)
-        while not stdout.channel.exit_status_ready():
-            solo_line = ""
-            if stdout.channel.recv_ready():
-                solo_line = stdout.channel.recv(1024)
-                alldata += solo_line
-                print solo_line
-                if "User Name:" in solo_line:
-                    stdin.channel.send('admin\n')
+            alldata = ""
+            stdout.channel.settimeout(2)
+            while not stdout.channel.exit_status_ready():
+                solo_line = ""
+                if stdout.channel.recv_ready():
+                    solo_line = stdout.channel.recv(1024)
+                    alldata += solo_line
+                    print solo_line
+                    if "User Name:" in solo_line:
+                        stdin.channel.send('admin\n')
 
-                if "Password:" in solo_line:
-                    stdin.channel.send('ceycswtic\n')
+                    if "Password:" in solo_line:
+                        stdin.channel.send('ceycswtic\n')
 
-                if "DGS-3100#" in solo_line:
-                    stdin.channel.send('logout\n')
-            time.sleep(3)
-            stdout.channel.close()
+                    if "DGS-3100#" in solo_line:
+                        stdin.channel.send('logout\n')
+                time.sleep(3)
+                stdout.channel.close()
 
-        if 'DGS-3100' in alldata:
-            d3100 = True
-        else:
+            if 'DGS-3100' in alldata:
+                d3100 = True
+            else:
+                d3100 = False
+            return d3100
+        except:
             d3100 = False
-        return d3100
-
+        finally:
+            return d3100
     # Telnet
     @staticmethod
     def is_dell6224(s, ssh, ipsw):
         dell6224 = None
         command = "telnet " + str(ipsw)
-        stdin, stdout, stderr = ssh.exec_command(command)
-        stdin.write('''admin\nceycswtic\nshow system\nq\nlogout\n''')
-        outlines = stdout.readlines()
-        resp = ''.join(outlines)
-        if 'PowerConnect 6224' in resp or 'Dell 24 Port' in resp:
-            dell6224 = True
-        else:
+        try:
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=2)
+            stdin.write('''admin\nceycswtic\nshow system\nq\nlogout\n''')
+            outlines = stdout.readlines()
+            resp = ''.join(outlines)
+            if 'PowerConnect 6224' in resp or 'Dell 24 Port' in resp:
+                dell6224 = True
+            else:
+                dell6224 = False
+            return dell6224
+        except:
             dell6224 = False
-        return dell6224
+        finally:
+            return dell6224
 
     def get_ports_status(self, ssh):
         pass
