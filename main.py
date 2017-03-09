@@ -197,6 +197,10 @@ def escanea():
                 print "Servidor " + ip + " guardado a CSV."
             except AuthenticationException as e:
                 print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
+                save_to_csv_down(i)
+            except:
+                print("Fallo de conexión con el servidor " + str(i)) + ": \n"
+                save_to_csv_down(i)
         else:
             print "Servidor caído " + i
             servers.append([str(i), 'Sin conexión'])

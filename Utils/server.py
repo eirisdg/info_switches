@@ -43,9 +43,7 @@ class Server:
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.connect(f0, username=username, password=password, timeout=10, pkey=key)
         except AuthenticationException:
-                print "No se ha podido conectar"
-        return ssh
-
+            pass
 
     def get_ip(self, ip):
         return ip
