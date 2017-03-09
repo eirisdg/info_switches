@@ -51,7 +51,7 @@ def menu():
             " 0. Salir\n"
             "====================")
 
-
+# Configura el fichero de ips
 def configurar():
     global fichero
     fichero = raw_input("Introduce la ruta del fichero de IPs: ")
@@ -126,6 +126,8 @@ def escanea():
                                 ports = sw.get_ports_status(ssh)
                             elif tipo == '3com':
                                 ports = [['3com', '192.168.4.' + str(j)]]
+                            elif tipo == 'Allied Telesyn':
+                                ports = [['Allied Telesyn, 195.168.4.' + str(j)]]
                             else:
                                 ports = 'unknown'
 

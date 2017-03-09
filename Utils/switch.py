@@ -19,6 +19,8 @@ class Switch(object):
         #nmap
         if Switch.is_3com(s,ssh,ipsw):
             tipo = '3com'
+        elif Switch.is_at(s, ssh, ipsw):
+            tipo = 'Allied Telesyn'
         #SSH
         elif Switch.is_d151028(s,ssh,ipsw):
             tipo = 'DGS-1510-28'
@@ -44,6 +46,17 @@ class Switch(object):
         stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
         nmap = stdout.read()
         if '3Com' in nmap or '3com' in nmap:
+            com = True
+        else:
+            com = False
+        return com
+
+    @staticmethod
+    def is_at(s, ssh, ipsw):
+        com = None
+        stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
+        nmap = stdout.read()
+        if 'Allied Telesyn' in nmap:
             com = True
         else:
             com = False
@@ -142,7 +155,7 @@ class Switch(object):
             sw.connect(s.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=4)
 
             interact = SSHClientInteraction(sw, timeout=1, display=False)
-            interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
+            interact.expect(['DGS-3427:5#', 'DGS-3427:4#', 'DGS-3427:admin#'])
             modelo = interact.current_output_clean
             interact.send('logout')
             interact.expect()
