@@ -9,6 +9,7 @@ class D3100(Switch):
         super(D3100,self).__init__(f0, ipsw)
 
     def get_ports_status(self, ssh):
+        stack = []
         try:
             command = "telnet " + str(self.ipsw)
             stdin, stdout, stderr = ssh.exec_command(command, timeout=2)
@@ -30,7 +31,6 @@ class D3100(Switch):
                         contador += 1
                     if contador is 2:
                         stdout.channel.close()
-            stack = []
             switch = ['DGS-3100', str(self.ipsw)]
             for line in alldata.splitlines():
                 if 'Enabled' in line:
@@ -43,6 +43,7 @@ class D3100(Switch):
                     else:
                         switch.append([unit, boca, 'Up'])
             stack.append(switch)
-            return stack
         except:
-            return [['Error de conexión']]
+            stack = [['Error de conexión']]
+        finally:
+            return stack

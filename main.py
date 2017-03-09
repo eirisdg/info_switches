@@ -23,7 +23,7 @@ logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 util.log_to_file("paramiko.log")
 
 
-fichero = "/home/eirisdg/PycharmProjects/info-switches/big_lista_base"
+fichero = ""
 lista_ips = []
 
 
@@ -40,17 +40,15 @@ class bcolors:
 
 # Función para imprimir menú
 def menu():
-    return ("====================\n"
-            "===     MENU     ===\n"
-            "====================\n"
+    return ("========================\n"
+            "===        MENU      ===\n"
+            "========================\n"
             "\n"
-            " 1. Configurar\n"
+            " 1. Configurar fichero\n"
             " 2. Escanear switches\n"
-            " 3. \n"
-            " 4. \n"
             "\n"
             " 0. Salir\n"
-            "====================")
+            "========================")
 
 # Configura el fichero de ips
 def configurar():
@@ -67,13 +65,16 @@ def configurar():
 # Carga la lista de IPs del fichero en el array
 def carga_en_array():
     global fichero, lista_ips
-    try:
-        archivo = open(fichero, 'r')
-        for line in archivo:
-            lista_ips.append(line[0:-1])
-        print "Lista de IPs cargada correctamente.\n"
-    except IOError:
-        print "No se puede abrir el archivo."
+    if fichero != '':
+        try:
+            archivo = open(fichero, 'r')
+            for line in archivo:
+                lista_ips.append(line[0:-1])
+            print "Lista de IPs cargada correctamente.\n"
+        except IOError:
+            print "No se puede abrir el archivo."
+    else:
+        print "No se ha introducido ningún fichero."
 
 
 # Obtiene la IP de F0 de una ip base
@@ -112,11 +113,11 @@ def save_to_csv(server):
                 tamanostack = len(stack)
                 for switch in stack:
                     if '3com' in switch or 'Allied Telesyn' in switch or 'Desconocido' in switch or tamanostack == 0:
-                        writer.writerow(['','','','','SW', switch[0]])
-                        writer.writerow(['','','','','IP', switch[1]])
+                        writer.writerow(['','','','','','SW', switch[0]])
+                        writer.writerow(['','','','','','IP', switch[1]])
                     else:
-                        puerto = ['','','','']
-                        status = ['','','','']
+                        puerto = ['','','','','']
+                        status = ['','','','','']
                         puerto.append('SW')
                         puerto.append(switch[0])
                         status.append('IP')
@@ -131,6 +132,8 @@ def save_to_csv(server):
             writer.writerow('')
         else:
             writer.writerow([server[0], server[2], marca])
+            writer.writerow('')
+            writer.writerow('')
 
 # Escanea la lista de ips de un archivo, las guarda en un array
 def escanea():
@@ -190,15 +193,15 @@ def escanea():
                     stack.append([['Sin switches']])
                 else:
                     servers.append(stack)
-                print stack
                 save_to_csv(stack)
+                print stack
+                print "Servidor " + ip + " guardado a CSV."
             except AuthenticationException as e:
                 print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
         else:
             print "Servidor caído " + i
             servers.append([str(i), 'Sin conexión'])
             save_to_csv_down(i)
-    #print(servers)
 
 # Aplicación principal
 if __name__ == "__main__":
@@ -219,12 +222,6 @@ if __name__ == "__main__":
                 break
             else:
                 escanea()
-
-        elif opcion == 3:
-            print opcion
-
-        elif opcion == 4:
-            print opcion
 
         elif opcion == 0:
             print "Hasta luego!"

@@ -10,6 +10,7 @@ class D121024(Switch):
         super(D121024,self).__init__(f0, ipsw)
 
     def get_ports_status(self, ssh):
+        stack = []
         try:
             sshtransport = ssh.get_transport()
             local_addr = (self.f0, 22)
@@ -29,8 +30,6 @@ class D121024(Switch):
             interact.close()
             sw.close()
             salida = interact.current_output_clean
-
-            stack = []
 
             switch1 = []
             switch1.append('DGS-1210-24')
@@ -55,7 +54,7 @@ class D121024(Switch):
                 else:
                     switch2.append([unit, boca, 'Down'])
             stack.append(switch2)
-
-            return stack
         except:
-            return [['Error de conexión']]
+            stack = [['Error de conexión']]
+        finally:
+            return stack

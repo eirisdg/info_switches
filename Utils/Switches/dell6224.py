@@ -8,15 +8,14 @@ class Dell6224(Switch):
         super(Dell6224,self).__init__(f0, ipsw)
 
     def get_ports_status(self, ssh):
+        stack = []
+        switch = []
         try:
             command = "telnet " + str(self.ipsw)
             stdin, stdout, stderr = ssh.exec_command(command)
             stdin.write('''admin\nceycswtic\nshow interfaces status\na\nq\nlogout\n''')
             outlines = stdout.readlines()
             resp = ''.join(outlines)
-
-            stack = []
-            switch = []
             switch.append('Dell-6224')
             switch.append(str(self.ipsw))
             for line in resp.splitlines():
@@ -39,7 +38,7 @@ class Dell6224(Switch):
                     else:
                         switch.append([unit, boca, status])
             stack.append(switch)
-
-            return stack
         except:
-            return [['Error de conexión']]
+            stack = [['Error de conexión']]
+        finally:
+            return stack

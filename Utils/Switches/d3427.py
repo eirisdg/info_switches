@@ -15,6 +15,7 @@ class D3427(Switch):
         super(D3427,self).__init__(f0, ipsw)
 
     def get_ports_status(self, ssh):
+        stack = []
         try:
             sshtransport = ssh.get_transport()
             local_addr = (self.f0, 22)
@@ -51,7 +52,6 @@ class D3427(Switch):
             interact.close()
             sw.close()
 
-            stack = []
             switch = []
             switch.append('DGS-3427')
             switch.append(str(self.ipsw))
@@ -71,6 +71,7 @@ class D3427(Switch):
 
                 if 'Notes:(F)indicates' in line:
                     stack.append(switch)
-            return stack
         except:
-            return [['Error de conexión']]
+            stack = [['Error de conexión']]
+        finally:
+            return stack

@@ -11,6 +11,8 @@ class D151028(Switch):
 
     # ([['DGS-1510-28']['X/xx', 'UP/DOWN'],['X/xx', 'UP/DOWN']],[['DGS-1510-28']['X/xx', 'UP/DOWN'],['X/xx', 'UP/DOWN']])
     def get_ports_status(self,ssh):
+        stack = []
+        switch = []
         try:
             sshtransport = ssh.get_transport()
             local_addr = (self.f0, 22)
@@ -31,8 +33,6 @@ class D151028(Switch):
             sw.close()
             salida = interact.current_output_clean
 
-            stack = []
-            switch = []
             switch.append('DGS-1510-28')
             switch.append(str(self.ipsw))
             for line in salida.splitlines():
@@ -56,6 +56,7 @@ class D151028(Switch):
                         switch.append([unit, boca, status])
                 elif 'Total Entries' in line:
                     stack.append(switch)
-            return(stack)
         except:
-            return [['Error de conexión']]
+            stack = [['Error de conexión']]
+        finally:
+            return stack

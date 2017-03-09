@@ -8,6 +8,8 @@ class D121028(Switch):
         super(D121028,self).__init__(f0, ipsw)
 
     def get_ports_status(self, ssh):
+        stack = []
+        switch1 = []
         try:
             command = "telnet " + str(self.ipsw)
             stdin, stdout, stderr = ssh.exec_command(command)
@@ -15,8 +17,6 @@ class D121028(Switch):
             outlines = stdout.readlines()
             resp = ''.join(outlines)
 
-            stack = []
-            switch1 = []
             switch1.append('DGS-1210-28')
             unitmax = int(0)
             for line in resp.splitlines():
@@ -33,7 +33,6 @@ class D121028(Switch):
 
                     switch1.append([unit, boca, status])
 
-            #print unitmax
             switch2 = []
             switch2.append('DGS-1210-28')
             switch2.append(str(self.ipsw))
@@ -46,7 +45,7 @@ class D121028(Switch):
                     else:
                         switch2.append([unit, boca, 'Down'])
                 stack.append(switch2)
-
-            return stack
         except:
-            return [['Error de conexión']]
+            stack = [['Error de conexión']]
+        finally:
+            return stack
