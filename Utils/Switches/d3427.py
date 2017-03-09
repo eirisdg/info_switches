@@ -28,7 +28,7 @@ class D3427(Switch):
 
         interact = SSHClientInteraction(sw, timeout=1, display=False)
         interact.send('\n')
-        interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
+        interact.expect(['DGS-3427:5#', 'DGS-3427:4#', 'DGS-3427:admin#'])
         modelo = interact.current_output
 
         if '1.20-B23' in modelo:
@@ -36,7 +36,7 @@ class D3427(Switch):
             interact.send('n')
             interact.send('q')
             interact.send('\n')
-            interact.expect(['DGS-3427:5#', 'DGS-3427:4#'])
+            interact.expect(['DGS-3427:5#', 'DGS-3427:4#', 'DGS-3427:admin#'])
             salida = interact.current_output
             interact.send('\n')
             interact.send('logout')

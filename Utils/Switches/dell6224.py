@@ -37,7 +37,7 @@ class Dell6224(Switch):
                     switch.append([unit, boca, status])
                 else:
                     switch.append([unit, boca, status])
-            elif 'console>logout' in line:
+            elif 'console>' in line or 'console#' in line:
                 stack.append(switch)
 
         return stack
