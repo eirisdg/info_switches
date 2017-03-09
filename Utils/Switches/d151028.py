@@ -11,48 +11,52 @@ class D151028(Switch):
 
     # ([['DGS-1510-28']['X/xx', 'UP/DOWN'],['X/xx', 'UP/DOWN']],[['DGS-1510-28']['X/xx', 'UP/DOWN'],['X/xx', 'UP/DOWN']])
     def get_ports_status(self,ssh):
-        sshtransport = ssh.get_transport()
-        local_addr = (self.f0, 22)
-        dest_addr = (self.ipsw, 22)
-        sshchannel = sshtransport.open_channel("direct-tcpip", dest_addr, local_addr)
-
-        sw = SSHClient()
-        sw.set_missing_host_key_policy(AutoAddPolicy())
-        sw.connect(self.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
-
-        interact = SSHClientInteraction(sw, timeout=1, display=False)
-        interact.expect(['Switch#', 'Switch0#'])
-        interact.send('show interface status')
-        interact.send('a')
-        interact.expect(['Switch#', 'Switch0#'])
-        interact.send('logout')
-        interact.close()
-        sw.close()
-        salida = interact.current_output_clean
-
         stack = []
         switch = []
-        switch.append('DGS-1510-28')
-        switch.append(str(self.ipsw))
-        for line in salida.splitlines():
-            if 'eth' in line:
-                unit = line.split('eth')[1][0]
-                boca = line.split('eth')[1][4:6]
-                if boca[1] == ' ':
-                    boca = boca[0]
-                if 'not-connected' in line:
-                    status = 'Down'
-                else:
-                    status = 'Up'
+        try:
+            sshtransport = ssh.get_transport()
+            local_addr = (self.f0, 22)
+            dest_addr = (self.ipsw, 22)
+            sshchannel = sshtransport.open_channel("direct-tcpip", dest_addr, local_addr)
 
-                if len(switch) > 1 and unit != switch[-1][0]:
+            sw = SSHClient()
+            sw.set_missing_host_key_policy(AutoAddPolicy())
+            sw.connect(self.f0, username='admin', password='ceycswtic', sock=sshchannel, timeout=5)
+
+            interact = SSHClientInteraction(sw, timeout=1, display=False)
+            interact.expect(['Switch#', 'Switch0#'])
+            interact.send('show interface status')
+            interact.send('a')
+            interact.expect(['Switch#', 'Switch0#'])
+            interact.send('logout')
+            interact.close()
+            sw.close()
+            salida = interact.current_output_clean
+
+            switch.append('DGS-1510-28')
+            switch.append(str(self.ipsw))
+            for line in salida.splitlines():
+                if 'eth' in line:
+                    unit = line.split('eth')[1][0]
+                    boca = line.split('eth')[1][4:6]
+                    if boca[1] == ' ':
+                        boca = boca[0]
+                    if 'not-connected' in line:
+                        status = 'Down'
+                    else:
+                        status = 'Up'
+
+                    if len(switch) > 1 and unit != switch[-1][0]:
+                        stack.append(switch)
+                        switch = []
+                        switch.append('DGS-1510-28')
+                        switch.append(str(self.ipsw))
+                        switch.append([unit, boca, status])
+                    else:
+                        switch.append([unit, boca, status])
+                elif 'Total Entries' in line:
                     stack.append(switch)
-                    switch = []
-                    switch.append('DGS-1510')
-                    switch.append(str(self.ipsw))
-                    switch.append([unit, boca, status])
-                else:
-                    switch.append([unit, boca, status])
-            elif 'Total Entries' in line:
-                stack.append(switch)
-        return(stack)
+        except:
+            stack = [['Error de conexión']]
+        finally:
+            return stack

@@ -43,24 +43,33 @@ class Switch(object):
     @staticmethod
     def is_3com(s, ssh, ipsw):
         com = None
-        stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
-        nmap = stdout.read()
-        if '3Com' in nmap or '3com' in nmap:
-            com = True
-        else:
+        try:
+            stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
+            nmap = stdout.read()
+            if '3Com' in nmap or '3com' in nmap:
+                com = True
+            else:
+                com = False
+            return com
+        except:
             com = False
-        return com
+        finally:
+            return com
 
     @staticmethod
     def is_at(s, ssh, ipsw):
         com = None
-        stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
-        nmap = stdout.read()
-        if 'Allied Telesyn' in nmap:
-            com = True
-        else:
+        try:
+            stdin, stdout, stderr = ssh.exec_command("nmap -sP -n " + ipsw)
+            nmap = stdout.read()
+            if 'Allied Telesyn' in nmap:
+                com = True
+            else:
+                com = False
+        except:
             com = False
-        return com
+        finally:
+            return com
 
     # SSH
     @staticmethod

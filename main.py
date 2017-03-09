@@ -15,6 +15,7 @@ from Utils.Switches.d121028 import *
 from Utils.Switches.d3100 import *
 
 import logging
+import csv
 
 # Para observar el log de paramiko usar siempre Logger
 logging.getLogger("paramiko").setLevel(logging.CRITICAL)
@@ -22,7 +23,7 @@ logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 util.log_to_file("paramiko.log")
 
 
-fichero = "/home/eirisdg/PycharmProjects/info-switches/prueba"
+fichero = ""
 lista_ips = []
 
 
@@ -39,17 +40,15 @@ class bcolors:
 
 # Función para imprimir menú
 def menu():
-    return ("====================\n"
-            "===     MENU     ===\n"
-            "====================\n"
+    return ("========================\n"
+            "===        MENU      ===\n"
+            "========================\n"
             "\n"
-            " 1. Configurar\n"
+            " 1. Configurar fichero\n"
             " 2. Escanear switches\n"
-            " 3. \n"
-            " 4. \n"
             "\n"
             " 0. Salir\n"
-            "====================")
+            "========================")
 
 # Configura el fichero de ips
 def configurar():
@@ -66,13 +65,16 @@ def configurar():
 # Carga la lista de IPs del fichero en el array
 def carga_en_array():
     global fichero, lista_ips
-    try:
-        archivo = open(fichero, 'r')
-        for line in archivo:
-            lista_ips.append(line[0:-1])
-        print "Lista de IPs cargada correctamente.\n"
-    except IOError:
-        print "No se puede abrir el archivo."
+    if fichero != '':
+        try:
+            archivo = open(fichero, 'r')
+            for line in archivo:
+                lista_ips.append(line[0:-1])
+            print "Lista de IPs cargada correctamente.\n"
+        except IOError:
+            print "No se puede abrir el archivo."
+    else:
+        print "No se ha introducido ningún fichero."
 
 
 # Obtiene la IP de F0 de una ip base
@@ -81,6 +83,57 @@ def get_f0(ipbase):
     f0 = ipbase.split('.')[0] + '.' + ipbase.split('.')[1] + '.' + ipbase.split('.')[2] + '.' + str(ultimo)
     return f0
 
+def save_to_csv_down(server):
+    with open('server_down.csv', 'a') as csv1:
+        writer = csv.writer(csv1, delimiter=';')
+        writer.writerow([server])
+
+def save_to_csv(server):
+    with open('server.csv', 'a') as csv1:
+        writer = csv.writer(csv1, delimiter=';')
+        contadorsw1 = 0
+        contadorresto = 0
+        marca = server[3][0][0]
+        if marca != 'Sin switches':
+            for stack in server[3:]:
+                tamanostack = len(stack)
+                for switch in stack:
+                    if '3com' in switch or 'Allied Telesyn' in switch or 'Desconocido' in switch or tamanostack == 0:
+                        pass
+                    else:
+                        numpuertos = len(switch) - 2
+                        for i in range(0, numpuertos, +1):
+                            if switch[i + 2][2] == 'Down':
+                                contadorresto += 1
+                            if switch == server[3][0] and switch[i + 2][2] == 'Down':
+                                contadorsw1 += 1
+
+            writer.writerow([server[0],server[2], marca, contadorsw1, contadorresto - contadorsw1])
+            for stack in server[3:]:
+                tamanostack = len(stack)
+                for switch in stack:
+                    if '3com' in switch or 'Allied Telesyn' in switch or 'Desconocido' in switch or tamanostack == 0:
+                        writer.writerow(['','','','','','SW', switch[0]])
+                        writer.writerow(['','','','','','IP', switch[1]])
+                    else:
+                        puerto = ['','','','','']
+                        status = ['','','','','']
+                        puerto.append('SW')
+                        puerto.append(switch[0])
+                        status.append('IP')
+                        status.append(switch[1])
+                        numpuertos = len(switch) - 2
+                        for i in range(0, numpuertos, +1):
+                            puerto.append(switch[i + 2][1])
+                            status.append(switch[i + 2][2])
+                        writer.writerow(puerto)
+                        writer.writerow(status)
+            writer.writerow('')
+            writer.writerow('')
+        else:
+            writer.writerow([server[0], server[2], marca])
+            writer.writerow('')
+            writer.writerow('')
 
 # Escanea la lista de ips de un archivo, las guarda en un array
 def escanea():
@@ -96,57 +149,59 @@ def escanea():
                 codigo_centro = s.get_codigo_centro(ssh)
                 tipo = s.get_tipo_centro(ssh)
                 print "\n\n===================================================\nConectado a centro " + codigo_centro + " con ip " + i + "\n==================================================="
-                if tipo != 'E20':
-                    stack = [ip, tipo, codigo_centro]
-                    for j in range(50, 40, -1):
-                        stdin, stdout, stderr = ssh.exec_command("fping -c1 -t100 192.168.4." + str(j) + " ")
-                        valor = stdout.read()
-                        if valor is not '':
-                            print "Ping a 192.168.4." + str(j) + bcolors.OKGREEN + " OK" + bcolors.ENDC
-                            tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
-                            ports = ""
-                            print tipo
-                            if tipo == 'DGS-1510-28':
-                                sw = D151028(s.f0, "192.168.4." + str(j))
-                                ports = sw.get_ports_status(ssh)
-                            elif tipo == 'DGS-1210-24':
-                                sw = D121024(s.f0, "192.168.4." + str(j))
-                                ports = sw.get_ports_status(ssh)
-                            elif tipo == 'DGS-3427':
-                                sw = D3427(s.f0, "192.168.4." + str(j))
-                                ports = sw.get_ports_status(ssh)
-                            elif tipo == 'Dell-6224':
-                                sw = Dell6224(s.f0, "192.168.4." + str(j))
-                                ports = sw.get_ports_status(ssh)
-                            elif tipo == 'DGS-1210-28':
-                                sw = D121028(s.f0, "192.168.4." + str(j))
-                                ports = sw.get_ports_status(ssh)
-                            elif tipo == 'DGS-3100':
-                                sw = D3100(s.f0, "192.168.4." + str(j))
-                                ports = sw.get_ports_status(ssh)
-                            elif tipo == '3com':
-                                ports = [['3com', '192.168.4.' + str(j)]]
-                            elif tipo == 'Allied Telesyn':
-                                ports = [['Allied Telesyn, 195.168.4.' + str(j)]]
-                            else:
-                                ports = 'unknown'
 
-                            stack.append(ports)
+                stack = [ip, tipo, codigo_centro]
+                for j in range(50, 40, -1):
+                    stdin, stdout, stderr = ssh.exec_command("fping -c1 -t100 192.168.4." + str(j) + " ")
+                    valor = stdout.read()
+                    if valor is not '':
+                        print "Ping a 192.168.4." + str(j) + bcolors.OKGREEN + " OK" + bcolors.ENDC
+                        tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
+                        ports = ""
+                        print tipo
+                        if tipo == 'DGS-1510-28':
+                            sw = D151028(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status(ssh)
+                        elif tipo == 'DGS-1210-24':
+                            sw = D121024(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status(ssh)
+                        elif tipo == 'DGS-3427':
+                            sw = D3427(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status(ssh)
+                        elif tipo == 'Dell-6224':
+                            sw = Dell6224(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status(ssh)
+                        elif tipo == 'DGS-1210-28':
+                            sw = D121028(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status(ssh)
+                        elif tipo == 'DGS-3100':
+                            sw = D3100(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status(ssh)
+                        elif tipo == '3com':
+                            ports = [['3com', '192.168.4.' + str(j)]]
+                        elif tipo == 'Allied Telesyn':
+                            ports = [['Allied Telesyn', '192.168.4.' + str(j)]]
+                        elif tipo == 'Desconocido':
+                            ports = [['Desconocido', '192.168.4.' + str(j)]]
                         else:
-                            print "Ping a 192.168.4." + str(j) + bcolors.FAIL + " KO" + bcolors.ENDC
-                    if len(stack) < 3:
-                        stack.append('Sin switches')
+                            ports = [['Desconocido', '192.168.4.' + str(j)]]
+
+                        stack.append(ports)
                     else:
-                        servers.append(stack)
+                        print "Ping a 192.168.4." + str(j) + bcolors.FAIL + " KO" + bcolors.ENDC
+                if len(stack) < 4:
+                    stack.append([['Sin switches']])
                 else:
-                    stack = [ip, tipo, codigo_centro]
+                    servers.append(stack)
+                save_to_csv(stack)
                 print stack
+                print "Servidor " + ip + " guardado a CSV."
             except AuthenticationException as e:
                 print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
         else:
             print "Servidor caído " + i
             servers.append([str(i), 'Sin conexión'])
-    print(servers)
+            save_to_csv_down(i)
 
 # Aplicación principal
 if __name__ == "__main__":
@@ -167,12 +222,6 @@ if __name__ == "__main__":
                 break
             else:
                 escanea()
-
-        elif opcion == 3:
-            print opcion
-
-        elif opcion == 4:
-            print opcion
 
         elif opcion == 0:
             print "Hasta luego!"
