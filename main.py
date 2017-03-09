@@ -23,7 +23,7 @@ logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 util.log_to_file("paramiko.log")
 
 
-fichero = "/home/eirisdg/PycharmProjects/info-switches/lista_prueba"
+fichero = "/home/eirisdg/PycharmProjects/info-switches/big_lista_base"
 lista_ips = []
 
 
@@ -82,48 +82,55 @@ def get_f0(ipbase):
     f0 = ipbase.split('.')[0] + '.' + ipbase.split('.')[1] + '.' + ipbase.split('.')[2] + '.' + str(ultimo)
     return f0
 
+def save_to_csv_down(server):
+    with open('server_down.csv', 'a') as csv1:
+        writer = csv.writer(csv1, delimiter=';')
+        writer.writerow([server])
+
 def save_to_csv(server):
     with open('server.csv', 'a') as csv1:
         writer = csv.writer(csv1, delimiter=';')
         contadorsw1 = 0
         contadorresto = 0
         marca = server[3][0][0]
+        if marca != 'Sin switches':
+            for stack in server[3:]:
+                tamanostack = len(stack)
+                for switch in stack:
+                    if '3com' in switch or 'Allied Telesyn' in switch or 'Desconocido' in switch or tamanostack == 0:
+                        pass
+                    else:
+                        numpuertos = len(switch) - 2
+                        for i in range(0, numpuertos, +1):
+                            if switch[i + 2][2] == 'Down':
+                                contadorresto += 1
+                            if switch == server[3][0] and switch[i + 2][2] == 'Down':
+                                contadorsw1 += 1
 
-        for stack in server[3:]:
-            tamanostack = len(stack)
-            for switch in stack:
-                if '3com' in switch or 'Allied Telesyn' in switch or 'Desconocido' in switch or tamanostack == 0:
-                    pass
-                else:
-                    numpuertos = len(switch) - 2
-                    for i in range(0, numpuertos, +1):
-                        if switch[i + 2][2] == 'Down':
-                            contadorresto += 1
-                        if switch == server[3][0] and switch[i + 2][2] == 'Down':
-                            contadorsw1 += 1
-
-        writer.writerow([server[0],server[2], marca, contadorsw1, contadorresto - contadorsw1])
-        for stack in server[3:]:
-            tamanostack = len(stack)
-            for switch in stack:
-                if '3com' in switch or 'Allied Telesyn' in switch or 'Desconocido' in switch or tamanostack == 0:
-                    writer.writerow(['','','','','SW', switch[0]])
-                    writer.writerow(['','','','','IP', switch[1]])
-                else:
-                    puerto = ['','','','']
-                    status = ['','','','']
-                    puerto.append('SW')
-                    puerto.append(switch[0])
-                    status.append('IP')
-                    status.append(switch[1])
-                    numpuertos = len(switch) - 2
-                    for i in range(0, numpuertos, +1):
-                        puerto.append(switch[i + 2][1])
-                        status.append(switch[i + 2][2])
-                    writer.writerow(puerto)
-                    writer.writerow(status)
-        writer.writerow('')
-        writer.writerow('')
+            writer.writerow([server[0],server[2], marca, contadorsw1, contadorresto - contadorsw1])
+            for stack in server[3:]:
+                tamanostack = len(stack)
+                for switch in stack:
+                    if '3com' in switch or 'Allied Telesyn' in switch or 'Desconocido' in switch or tamanostack == 0:
+                        writer.writerow(['','','','','SW', switch[0]])
+                        writer.writerow(['','','','','IP', switch[1]])
+                    else:
+                        puerto = ['','','','']
+                        status = ['','','','']
+                        puerto.append('SW')
+                        puerto.append(switch[0])
+                        status.append('IP')
+                        status.append(switch[1])
+                        numpuertos = len(switch) - 2
+                        for i in range(0, numpuertos, +1):
+                            puerto.append(switch[i + 2][1])
+                            status.append(switch[i + 2][2])
+                        writer.writerow(puerto)
+                        writer.writerow(status)
+            writer.writerow('')
+            writer.writerow('')
+        else:
+            writer.writerow([server[0], server[2], marca])
 
 # Escanea la lista de ips de un archivo, las guarda en un array
 def escanea():
@@ -170,15 +177,17 @@ def escanea():
                         elif tipo == '3com':
                             ports = [['3com', '192.168.4.' + str(j)]]
                         elif tipo == 'Allied Telesyn':
-                            ports = [['Allied Telesyn, 195.168.4.' + str(j)]]
+                            ports = [['Allied Telesyn', '192.168.4.' + str(j)]]
+                        elif tipo == 'Desconocido':
+                            ports = [['Desconocido', '192.168.4.' + str(j)]]
                         else:
-                            ports = 'unknown'
+                            ports = [['Desconocido', '192.168.4.' + str(j)]]
 
                         stack.append(ports)
                     else:
                         print "Ping a 192.168.4." + str(j) + bcolors.FAIL + " KO" + bcolors.ENDC
-                if len(stack) < 3:
-                    stack.append('Sin switches')
+                if len(stack) < 4:
+                    stack.append([['Sin switches']])
                 else:
                     servers.append(stack)
                 print stack
@@ -188,6 +197,7 @@ def escanea():
         else:
             print "Servidor caído " + i
             servers.append([str(i), 'Sin conexión'])
+            save_to_csv_down(i)
     #print(servers)
 
 # Aplicación principal
