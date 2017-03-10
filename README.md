@@ -1,17 +1,17 @@
 # Escaneador de switches
 
-### Información
+## Información
 La aplicación se encarga de escanear la plataforma de
 servidores a través de una lista de ips dada en un fichero, conectarse a dichos
 servidores, y escanear los switches en las ips entre la 192.168.4.40 y 192.168.4.50
 para sacar la información de las bocas físicas de dichos switches.
 
-### Requisitos
+## Requisitos
 - Python 2.7
 - Paramiko (pip install paramiko)
 - Paramiko expect (pip install git+https://github.com/fgimian/paramiko-expect.git)
 
-### Instrucciones
+## Instrucciones
 El fichero principal de la aplicación es el **main.py**. Se ejecutará con:
 
 ```python main.py```
@@ -27,11 +27,11 @@ Al ejecutable se le puede pasar como parámetro el fichero con la lista de IPs:
 En el caso de que de error en la lectura de fichero, asegurar que tras la última IP
 de la lista hay una línea en blanco.
 
-### Autores
+## Autores
 - Mario Adrián Domínguez
 - Jesús Velázquez
 
-#### Cambios
+## Cambios
 **1.6.03**
 - Se permite pasar por parámetro el fichero de IPs
 - Añadido método de detección del Dlink DGS-1210-24 por Telnet
