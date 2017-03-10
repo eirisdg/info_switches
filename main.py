@@ -16,14 +16,18 @@ from Utils.Switches.d3100 import *
 
 import logging
 import csv
+import sys
+
+if len(sys.argv) is 2:
+    fichero = sys.argv[1]
+else:
+    fichero = ""
 
 # Para observar el log de paramiko usar siempre Logger
 logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 # Guarda en un fichero los resultados
 util.log_to_file("paramiko.log")
 
-
-fichero = "/tmp/pp"
 lista_ips = []
 
 
@@ -162,9 +166,9 @@ def escanea():
                         if tipo == 'DGS-1510-28':
                             sw = D151028(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
-                        #elif tipo == 'DGS-1210-24':
-                        #     sw = D121024(s.f0, "192.168.4." + str(j))
-                        #    ports = sw.get_ports_status(ssh)
+                        elif tipo == 'DGS-1210-24':
+                            sw = D121024(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status(ssh)
                         elif tipo == 'DGS-3427':
                             sw = D3427(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
@@ -197,6 +201,7 @@ def escanea():
                 else:
                     servers.append(stack)
                 save_to_csv(stack)
+                print stack
                 print "Servidor " + ip + " guardado a CSV."
             except AuthenticationException as e:
                 print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
