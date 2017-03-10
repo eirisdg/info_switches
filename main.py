@@ -209,7 +209,6 @@ def escanea():
                 else:
                     servers.append(stack)
                 save_to_csv(stack)
-                print stack
                 print "Servidor " + ip + " guardado a CSV."
             except AuthenticationException as e:
                 print("Fallo de conexión con el servidor " + str(i)) + ": \n" + e.message
