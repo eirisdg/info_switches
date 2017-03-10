@@ -24,6 +24,8 @@ class Switch(object):
         #SSH
         elif Switch.is_d151028(s,ssh,ipsw):
             tipo = 'DGS-1510-28'
+        elif Switch.is_d151028_tel(s,ssh,ipsw):
+            tipo = 'DGS-1510-28-Telnet'
         elif Switch.is_d3427(s, ssh, ipsw):
             tipo = 'DGS-3427'
         #telnet
@@ -106,6 +108,25 @@ class Switch(object):
             else:
                 d1510 = False
         except Exception:
+            d1510 = False
+        finally:
+            return d1510
+
+    # Telnet
+    @staticmethod
+    def is_d151028_tel(s, ssh, ipsw):
+        d1510 = None
+        command = "telnet " + str(ipsw)
+        try:
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=5)
+            stdin.write('''admin\nceycswtic\nshow unit 1\nlogout\n''')
+            outlines = stdout.readlines()
+            resp = ''.join(outlines)
+            if 'DGS-1510-28' in resp:
+                d1510 = True
+            else:
+                d1510 = False
+        except:
             d1510 = False
         finally:
             return d1510
