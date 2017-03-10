@@ -12,7 +12,7 @@ class D3100(Switch):
         stack = []
         try:
             command = "telnet " + str(self.ipsw)
-            stdin, stdout, stderr = ssh.exec_command(command, timeout=2)
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=5)
             contador = 0
             alldata = ""
             stdout.channel.settimeout(4)
