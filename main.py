@@ -54,6 +54,7 @@ def menu():
             " 0. Salir\n"
             "========================")
 
+
 # Configura el fichero de ips
 def configurar():
     global fichero
@@ -87,10 +88,12 @@ def get_f0(ipbase):
     f0 = ipbase.split('.')[0] + '.' + ipbase.split('.')[1] + '.' + ipbase.split('.')[2] + '.' + str(ultimo)
     return f0
 
+
 def save_to_csv_down(server):
     with open('server_down.csv', 'a') as csv1:
         writer = csv.writer(csv1, delimiter=';')
         writer.writerow([server])
+
 
 def save_to_csv(server):
     with open('server.csv', 'a') as csv1:
@@ -139,6 +142,7 @@ def save_to_csv(server):
             writer.writerow('')
             writer.writerow('')
 
+
 # Escanea la lista de ips de un archivo, las guarda en un array
 def escanea():
     global lista_ips
@@ -155,9 +159,12 @@ def escanea():
                 print "\n\n===================================================\nConectado a centro " + codigo_centro + " con ip " + i + "\n==================================================="
 
                 stack = [ip, tipo, codigo_centro]
+                cuentako = 0
                 for j in range(50, 40, -1):
                     stdin, stdout, stderr = ssh.exec_command("fping -c1 -t100 192.168.4." + str(j) + " ")
                     valor = stdout.read()
+                    if cuentako == 3:
+                        break
                     if valor is not '':
                         print "Ping a 192.168.4." + str(j) + bcolors.OKGREEN + " OK" + bcolors.ENDC
                         tipo = Switch.get_tipo(s, ssh, "192.168.4." + str(j))
@@ -196,6 +203,7 @@ def escanea():
                         stack.append(ports)
                     else:
                         print "Ping a 192.168.4." + str(j) + bcolors.FAIL + " KO" + bcolors.ENDC
+                        cuentako += 1
                 if len(stack) < 4:
                     stack.append([['Sin switches']])
                 else:
