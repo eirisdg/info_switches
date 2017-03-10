@@ -7,9 +7,9 @@ servidores, y escanear los switches en las ips entre la 192.168.4.40 y 192.168.4
 para sacar la información de las bocas físicas de dichos switches.
 
 ## Requisitos
-- Python 2.7
-- Paramiko (pip install paramiko)
-- Paramiko expect (pip install git+https://github.com/fgimian/paramiko-expect.git)
+- Python 2.7 y Python Pip (sudo apt-get install python python-pip)
+- Paramiko (sudo pip install paramiko)
+- Paramiko expect (sudo pip install git+https://github.com/fgimian/paramiko-expect.git)
 
 ## Instrucciones
 El fichero principal de la aplicación es el **main.py**. Se ejecutará con:
