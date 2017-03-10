@@ -12,7 +12,7 @@ class Dell6224(Switch):
         switch = []
         try:
             command = "telnet " + str(self.ipsw)
-            stdin, stdout, stderr = ssh.exec_command(command)
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=5)
             stdin.write('''admin\nceycswtic\nshow interfaces status\na\nq\nlogout\n''')
             outlines = stdout.readlines()
             resp = ''.join(outlines)
