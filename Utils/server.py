@@ -42,6 +42,7 @@ class Server:
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.connect(f0, username=username, password=password, timeout=10, pkey=key)
+            return ssh
         except AuthenticationException:
             pass
 

@@ -46,7 +46,60 @@ class D121024(Switch):
             switch2 = []
             switch2.append('DGS-1210-24')
             switch2.append(str(self.ipsw))
-            for i in range(1, 25, +1):
+            for i in range(1, 29, +1):
+                unit = 1
+                boca = i
+                if [str(unit), str(boca), 'Up'] in switch1:
+                    switch2.append([unit, boca, 'Up'])
+                else:
+                    switch2.append([unit, boca, 'Down'])
+            stack.append(switch2)
+        except:
+            stack = [['Error de conexión']]
+        finally:
+            return stack
+
+    def get_ports_status_tel(self,ssh):
+        command = "telnet " + str(self.ipsw)
+        stack = []
+        try:
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=5)
+            contador = 0
+            alldata = ""
+            stdout.channel.settimeout(4)
+            while not stdout.channel.exit_status_ready():
+                solo_line = ""
+                if stdout.channel.recv_ready():
+                    solo_line = stdout.channel.recv(3048)
+                    alldata += solo_line
+                    if "UserName:" in solo_line:
+                        stdin.channel.send('admin\n')
+                    if "PassWord:" in solo_line:
+                        stdin.channel.send('ceycswtic\n')
+                    if "DGS-1210-24:admin#" in solo_line:
+                        stdin.channel.send('debug info\n')
+                        stdin.channel.send('a')
+                        contador += 1
+                    if contador is 2:
+                        stdout.channel.close()
+
+            salida = alldata
+            switch1 = []
+            switch1.append('DGS-1210-24')
+            for line in salida.splitlines():
+                if 'Learnt' in line:
+                    unit = "1"
+                    boca = line.split('Learnt')[1][6:8]
+                    if boca[0] == ' ':
+                        boca = boca[1]
+                    else:
+                        boca = boca[0:2]
+                    status = 'Up'
+                    switch1.append([unit, boca, status])
+            switch2 = []
+            switch2.append('DGS-1210-24')
+            switch2.append(str(self.ipsw))
+            for i in range(1, 29, +1):
                 unit = 1
                 boca = i
                 if [str(unit), str(boca), 'Up'] in switch1:
