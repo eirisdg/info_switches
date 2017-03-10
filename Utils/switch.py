@@ -26,6 +26,9 @@ class Switch(object):
             tipo = 'DGS-1510-28'
         elif Switch.is_d3427(s, ssh, ipsw):
             tipo = 'DGS-3427'
+        #telnet
+        elif Switch.is_d3427_tel(s,ssh, ipsw):
+            tipo = 'DGS-3427-Telnet'
         # telnet
         elif Switch.is_121024_tel(s, ssh, ipsw):
             tipo = 'DGS-1210-24-Telnet'
@@ -173,6 +176,26 @@ class Switch(object):
 
     # Telnet
     @staticmethod
+    def is_d3427_tel(s, ssh, ipsw):
+        d3427 = None
+        command = "telnet " + str(ipsw)
+        try:
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=5)
+            stdin.write('''admin\nceycswtic\nlogout\n''')
+            outlines = stdout.readlines()
+            resp = ''.join(outlines)
+            if 'DGS-3427' in resp:
+                d3427 = True
+            else:
+                d3427 = False
+        except:
+            d3427 = False
+        finally:
+            return d3427
+
+
+    # Telnet
+    @staticmethod
     def is_121024_tel(s,ssh,ipsw):
         d121024 = None
         command = "telnet " + str(ipsw)
@@ -226,7 +249,6 @@ class Switch(object):
                 if stdout.channel.recv_ready():
                     solo_line = stdout.channel.recv(1024)
                     alldata += solo_line
-                    print solo_line
                     if "User Name:" in solo_line:
                         stdin.channel.send('admin\n')
 
@@ -258,7 +280,7 @@ class Switch(object):
             stdin.write('''admin\nceycswtic\nshow system\nq\nlogout\n''')
             outlines = stdout.readlines()
             resp = ''.join(outlines)
-            if 'PowerConnect 6224' in resp or 'Dell 24 Port' in resp:
+            if 'PowerConnect 6224' in resp or 'Dell 24 Port' in resp or 'Powerconnect 6224' in resp:
                 dell6224 = True
             else:
                 dell6224 = False
