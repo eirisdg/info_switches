@@ -26,11 +26,13 @@ class Switch(object):
             tipo = 'DGS-1510-28'
         elif Switch.is_d3427(s, ssh, ipsw):
             tipo = 'DGS-3427'
-        #elif Switch.is_d121024(s, ssh, ipsw):
-        #    tipo = 'DGS-1210-24'
         # telnet
-        elif Switch.is_121024_tel(s,ssh,ipsw):
+        elif Switch.is_121024_tel(s, ssh, ipsw):
             tipo = 'DGS-1210-24-Telnet'
+        #ssh
+        elif Switch.is_d121024(s, ssh, ipsw):
+            tipo = 'DGS-1210-24'
+        #telnet
         elif Switch.is_dell6224(s, ssh, ipsw):
             tipo = 'Dell-6224'
         elif Switch.is_d121028(s, ssh, ipsw):

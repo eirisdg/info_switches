@@ -6,3 +6,5 @@
 /Utils/Switches/*.pyc
 /Utils/prueba.py
 /prueba
+/server.csv
+/server_down.csv

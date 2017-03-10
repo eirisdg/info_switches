@@ -51,7 +51,6 @@ class Server:
 
     def get_codigo_centro(self, ssh):
         stdin, stdout, stderr = ssh.exec_command('cat /etc/puppet/data/info_centro | grep CODIGO=')
-        print stderr
         codigo = stdout.read().split('CODIGO=')[1][0:-1]
         return codigo
 
