@@ -42,6 +42,7 @@ class Server:
             ssh = SSHClient()
             ssh.set_missing_host_key_policy(AutoAddPolicy())
             ssh.connect(f0, username=username, password=password, timeout=10, pkey=key)
+            return ssh
         except AuthenticationException:
             pass
 
@@ -50,6 +51,7 @@ class Server:
 
     def get_codigo_centro(self, ssh):
         stdin, stdout, stderr = ssh.exec_command('cat /etc/puppet/data/info_centro | grep CODIGO=')
+        print stderr
         codigo = stdout.read().split('CODIGO=')[1][0:-1]
         return codigo
 

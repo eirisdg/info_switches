@@ -23,7 +23,7 @@ logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 util.log_to_file("paramiko.log")
 
 
-fichero = ""
+fichero = "/tmp/pp"
 lista_ips = []
 
 
@@ -162,9 +162,9 @@ def escanea():
                         if tipo == 'DGS-1510-28':
                             sw = D151028(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
-                        elif tipo == 'DGS-1210-24':
-                            sw = D121024(s.f0, "192.168.4." + str(j))
-                            ports = sw.get_ports_status(ssh)
+                        #elif tipo == 'DGS-1210-24':
+                        #     sw = D121024(s.f0, "192.168.4." + str(j))
+                        #    ports = sw.get_ports_status(ssh)
                         elif tipo == 'DGS-3427':
                             sw = D3427(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
@@ -174,6 +174,9 @@ def escanea():
                         elif tipo == 'DGS-1210-28':
                             sw = D121028(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
+                        elif tipo == 'DGS-1210-24-Telnet':
+                            sw = D121024(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status_tel(ssh)
                         elif tipo == 'DGS-3100':
                             sw = D3100(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
@@ -206,23 +209,19 @@ def escanea():
             servers.append([str(i), 'Sin conexión'])
             save_to_csv_down(i)
 
-# Aplicación principal
+
+########### Aplicación principal ##################
 if __name__ == "__main__":
     while True:
-        # Mostramos menú
         print menu()
-
-        # Solicitamos la opción
         opcion = input("Introduce una opción: ")
 
-        # Case para las opciones del menú
         if opcion == 1:
             configurar()
 
         elif opcion == 2:
             if fichero == "":
                 print "No se ha establecido fichero de IPs"
-                break
             else:
                 escanea()
 
