@@ -60,3 +60,42 @@ class D151028(Switch):
             stack = [['Error de conexión']]
         finally:
             return stack
+
+
+    # Telnet
+    def get_ports_status_tel(self,ssh):
+        stack = []
+        switch = []
+        command = "telnet " + str(self.ipsw)
+        try:
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=5)
+            stdin.write('''admin\nceycswtic\nshow interfaces status\na\nq\nlogout\n''')
+            outlines = stdout.readlines()
+            salida = ''.join(outlines)
+            switch.append('DGS-1510-28')
+            switch.append(str(self.ipsw))
+            for line in salida.splitlines():
+                if 'eth' in line:
+                    unit = line.split('eth')[1][0]
+                    boca = line.split('eth')[1][4:6]
+                    if boca[1] == ' ':
+                        boca = boca[0]
+                    if 'not-connected' in line:
+                        status = 'Down'
+                    else:
+                        status = 'Up'
+
+                    if len(switch) > 1 and unit != switch[-1][0]:
+                        stack.append(switch)
+                        switch = []
+                        switch.append('DGS-1510-28')
+                        switch.append(str(self.ipsw))
+                        switch.append([unit, boca, status])
+                    else:
+                        switch.append([unit, boca, status])
+                elif 'Total Entries' in line:
+                    stack.append(switch)
+        except:
+            stack = [['Error de conexión']]
+        finally:
+            return stack

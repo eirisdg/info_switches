@@ -67,46 +67,67 @@ class D121024(Switch):
             contador = 0
             alldata = ""
             stdout.channel.settimeout(4)
+            firm = 'normal'
             while not stdout.channel.exit_status_ready():
                 solo_line = ""
                 if stdout.channel.recv_ready():
                     solo_line = stdout.channel.recv(3048)
                     alldata += solo_line
-                    if "UserName:" in solo_line:
+                    if "UserName:" in solo_line or 'DGS-1210-24 login' in solo_line:
                         stdin.channel.send('admin\n')
-                    if "PassWord:" in solo_line:
+                        if 'DGS-1210-24 login' in solo_line:
+                            firm = 'nuevo'
+                    if "PassWord:" in solo_line or 'Password' in solo_line:
                         stdin.channel.send('ceycswtic\n')
-                    if "DGS-1210-24:admin#" in solo_line:
-                        stdin.channel.send('debug info\n')
-                        stdin.channel.send('a')
-                        contador += 1
+                    if "DGS-1210-24:admin#" in solo_line or 'DGS-1210-24:5#' in solo_line:
+                        if firm == 'normal':
+                            stdin.channel.send('debug info\n')
+                            stdin.channel.send('a')
+                            contador += 1
+                        elif firm == 'nuevo':
+                            stdin.channel.send('show ports\n')
+                            stdin.channel.send('a')
+                            contador += 1
                     if contador is 2:
                         stdout.channel.close()
-
             salida = alldata
-            switch1 = []
-            switch1.append('DGS-1210-24')
-            for line in salida.splitlines():
-                if 'Learnt' in line:
-                    unit = "1"
-                    boca = line.split('Learnt')[1][6:8]
-                    if boca[0] == ' ':
-                        boca = boca[1]
+            if firm == 'normal':
+                switch1 = []
+                switch1.append('DGS-1210-24')
+                for line in salida.splitlines():
+                    if 'Learnt' in line:
+                        unit = "1"
+                        boca = line.split('Learnt')[1][6:8]
+                        if boca[0] == ' ':
+                            boca = boca[1]
+                        else:
+                            boca = boca[0:2]
+                        status = 'Up'
+                        switch1.append([unit, boca, status])
+                switch2 = []
+                switch2.append('DGS-1210-24')
+                switch2.append(str(self.ipsw))
+                for i in range(1, 29, +1):
+                    unit = 1
+                    boca = i
+                    if [str(unit), str(boca), 'Up'] in switch1:
+                        switch2.append([unit, boca, 'Up'])
                     else:
-                        boca = boca[0:2]
-                    status = 'Up'
-                    switch1.append([unit, boca, status])
-            switch2 = []
-            switch2.append('DGS-1210-24')
-            switch2.append(str(self.ipsw))
-            for i in range(1, 29, +1):
-                unit = 1
-                boca = i
-                if [str(unit), str(boca), 'Up'] in switch1:
-                    switch2.append([unit, boca, 'Up'])
-                else:
-                    switch2.append([unit, boca, 'Down'])
-            stack.append(switch2)
+                        switch2.append([unit, boca, 'Down'])
+                stack.append(switch2)
+            elif firm == 'nuevo':
+                switch = ['DGS-1210-24', str(self.ipsw)]
+                for line in alldata.splitlines():
+                    if 'Enabled' in line:
+                        unit = 1
+                        boca = line[0:2]
+                        if boca[1] == ' ':
+                            boca = boca[0]
+                        if 'Link Down' in line:
+                            switch.append([unit, boca, 'Down'])
+                        else:
+                            switch.append([unit, boca, 'Up'])
+                stack.append(switch)
         except:
             stack = [['Error de conexión']]
         finally:

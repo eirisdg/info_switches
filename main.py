@@ -173,12 +173,18 @@ def escanea():
                         if tipo == 'DGS-1510-28':
                             sw = D151028(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
+                        elif tipo == 'DGS-1510-28-Telnet':
+                            sw = D151028(s.f0, "192.168.4." + str(j))
+                            ports = sw.get_ports_status_tel(ssh)
                         elif tipo == 'DGS-1210-24':
                             sw = D121024(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
                         elif tipo == 'DGS-3427':
                             sw = D3427(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)
+                        elif tipo == 'DGS-3427-Telnet':
+                            sw = D3427(s.f0, '192.168.4.' + str(j))
+                            ports = sw.get_ports_status_tel(ssh)
                         elif tipo == 'Dell-6224':
                             sw = Dell6224(s.f0, "192.168.4." + str(j))
                             ports = sw.get_ports_status(ssh)

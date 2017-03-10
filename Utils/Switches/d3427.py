@@ -75,3 +75,35 @@ class D3427(Switch):
             stack = [['Error de conexión']]
         finally:
             return stack
+
+    def get_ports_status_tel(self, ssh):
+        command = "telnet " + str(self.ipsw)
+        stack = []
+        try:
+            stdin, stdout, stderr = ssh.exec_command(command, timeout=5)
+            stdin.write('''admin\nceycswtic\nshow ports\nn\nq\nlogout\n''')
+            outlines = stdout.readlines()
+            salida = ''.join(outlines)
+            switch = []
+            switch.append('DGS-3427')
+            switch.append(str(self.ipsw))
+            for line in salida.splitlines():
+                if 'Enabled' in line or 'Auto/Disabled' in line:
+                    unit = 1
+                    boca = line[1:3]
+                    if boca[1] == ' ':
+                        boca = boca[0]
+                    if '(F)' in line:
+                        boca += 'F'
+                    if 'Link Down' in line:
+                        status = 'Down'
+                    else:
+                        status = 'Up'
+                    switch.append([unit, boca, status])
+
+                if 'Notes:(F)indicates' in line:
+                    stack.append(switch)
+        except:
+            stack = [['Error de conexión']]
+        finally:
+            return stack
